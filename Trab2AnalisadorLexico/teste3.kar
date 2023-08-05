@@ -1,0 +1,15 @@
+void main() {
+    newVar integer num1, num2, num3;
+    num1 = 1.2E-3;
+    System.output(num1);
+    
+    num2 = 4;
+    num2 = num2 * 3 - 4;
+
+    num3 = num2;
+
+    while (num3 > 0) {
+        System.output(num3);
+        num3 = num3 - 1;
+    }
+}
