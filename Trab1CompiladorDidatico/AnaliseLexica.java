@@ -1,5 +1,4 @@
 import java.io.*;
-import java.lang.System;
 
 enum TokenType { NUM, SOMA, MULT, APar, FPar, EOF, DIV, SUB}
 
