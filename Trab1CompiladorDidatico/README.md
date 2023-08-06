@@ -27,3 +27,9 @@ versão gerada no exercício 2.
 - `Parser.java`: análise sintática da gramática;
 - `CodeGen.java`: recebe a árvore sintática do *parser* e gera o código para máquina de pilha;
 - `ArvoreSintatica.java`: contém as definições das classes da árvore sintática.
+
+## execução
+
+Para executar este Compilador, é necessário ter a ferramenta JavaCC instalada. 
+
+Caso você tenha Windows, sugere-se instalar o WSL do Ubuntu disponível na Microsoft Store. Após instalar o Ubuntu, atualize o sistema com `apt-get update` e instale o JavaCC com `apt-get install javacc`. Compile os arquivos com `javac *.java` e rode o programa com `java Compilador teste1`.
