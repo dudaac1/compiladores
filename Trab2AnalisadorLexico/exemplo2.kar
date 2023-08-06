@@ -11,5 +11,5 @@ void main() {
     while (num3 > 0) {
         System.output(num3);
         num3 = num3 - 1;
-    }
+    };
 }

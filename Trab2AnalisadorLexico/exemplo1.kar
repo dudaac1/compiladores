@@ -1,14 +1,14 @@
 void main() {
     newVar integer n;
     n = 9;
-    if ((n > 0)) then {
+    if (n > 0) then {
         System.output(fibonacci(n));
     };
 }
 
 func integer fibonacci(integer num) {
-    if ((num < 2)) then {
+    if (num < 2) then {
         return num;
-    };
+    } ;
     return fibonacci(num-1) + fibonacci(num-2);
 }

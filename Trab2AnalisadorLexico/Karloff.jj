@@ -107,8 +107,8 @@ void Karloff () :
 | <MULT> { System.out.println("Multiplicação: *");}
 | <DIV> { System.out.println("Divisão: /");}
 | <IGUAL> { System.out.println("Igual: ==");}
-| <MAIORQUE> { System.out.println("Menor que: <");}
-| <MENORQUE> { System.out.println("Maior que: >");}
+| <MENORQUE> { System.out.println("Menor que: <");}
+| <MAIORQUE> { System.out.println("Maior que: >");}
 | <AND> { System.out.println("E: &");}
 | <OR> { System.out.println("OU: |");}
 
