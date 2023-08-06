@@ -27,60 +27,10 @@ cima das modificações feitas no exercício 1, e o exercício 3 deve ser implem
 versão gerada no exercício 2.
 
 ## 2️⃣: analisador léxico
-
-O objetivo do trabalho é implementar um Analisador Léxico para a Linguagem Karloff usando a ferramenta JavaCC. O aluno deve usar a gramática da linguagem Karloff (que está disponível em PDF) como referência para os possíveis tokens da linguagem. Por exemplo, para o seguinte programa escrito em Karloff:
-
-```
-void main () {
-    newVar integer teste;
-    teste = 9;
-    System.output (teste);
-}
-```
-
-a saída deve ser algo parecido com:
-
-```
-$java Karloff teste.kar
-    Palavra reservada: void
-    Palavra reservada: main
-    Abre parênteses: (
-    Fecha parênteses: )
-    Abre chaves: {
-    Palavra reservada: newVar
-    Palavra reservada: integer
-    Identificador: teste
-    Ponto e virgula: ;
-    Identificador: teste
-    Atribuição: =
-    Número: 9
-    Ponto e virgula: ;
-    Palavra reservada: System.output
-    Abre parênteses: (
-    Identificador: teste
-    Fecha parênteses: )
-    Ponto e virgula: ;
-    Fecha chaves: }
-```
-
-Além da implementação do Analisador Léxico em JavaCC, o aluno deve também fornecer dois exemplos novos de programas escritos em Karloff que usem boa parte das construções da linguagem.
+O objetivo do trabalho é implementar um Analisador Léxico para a Linguagem Karloff usando a ferramenta JavaCC. O aluno deve usar a gramática da linguagem Karloff (que está disponível em PDF) como referência para os possíveis tokens da linguagem. [...] Além da implementação do Analisador Léxico em JavaCC, o aluno deve também fornecer dois exemplos novos de programas escritos em Karloff que usem boa parte das construções da linguagem.
 
 ## 3️⃣: analisador sintático
-O objetivo do trabalho é implementar um *parser* (Analisador Sintático) para a linguagem Karloff. O *parser* deve ser construído em cima do Analisador Léxico proposto para a mesma linguagem no Trabalho 2. Lembrando que o JavaCC não aceita recursão à esquerda nem alternativas começando com um mesmo símbolo, dessa forma, essas construções devem ser eliminadas da gramática caso existam. 
-
-Dicas:
-- todo não-terminal vira uma função;
-- todo terminal deve ser chamado por meio do seu token. Exemplo: para *main* usar < MAIN >;
-- a primeira regra deve possuir < EOF > antes de fechar sua declaração;
-- uma regra que possua a opção de "ou vazio" deve ser implementada com o símbolo ?. Exemplo: a regra `C → COM ";" C' | epsilon`` é apresentada do seguinte modo:
-    ```
-    void C(): {} {
-        (C() < PONTOVIRGULA > CLinha())?        
-    }
-    ```
-- o OU no JavaCC é um pipe (|);
-
-As dicas de como implementar esse *parser* estão na vídeo aula: 09 - Análise Sintática usando a ferramenta Javacc. Os alunos devem entregar também dois exemplos de programas que usem uma grande parte das construções sintáticas disponíveis na linguagem. A regra C 
+O objetivo do trabalho é implementar um *parser* (Analisador Sintático) para a linguagem Karloff. Ele deve ser construído em cima do Analisador Léxico proposto para a mesma linguagem no Trabalho 2. Lembrando que o JavaCC não aceita recursão à esquerda nem alternativas começando com um mesmo símbolo, dessa forma, essas construções devem ser eliminadas da gramática caso existam.  Também deve ser entregue dois exemplos de programas que usem uma grande parte das construções sintáticas disponíveis na linguagem. 
 
 ##
 *Eduarda A. Carvalho, agosto/2023.<br>
