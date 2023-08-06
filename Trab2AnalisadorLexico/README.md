@@ -8,4 +8,4 @@ Os seguintes comandos deverão ser executados na linha de comando:
 
 `javac *.java`
 
-`java Karloff teste1.kar`
+`java Karloff teste.kar`
