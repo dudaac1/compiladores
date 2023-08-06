@@ -14,12 +14,11 @@ class Token {
 }
 
 class AnaliseLexica {
-	static char lastchar;
-	static int flag = 0; 
-
-	BufferedReader arquivo;
-	AnaliseLexica(String a) throws Exception {
-	 	this.arquivo = new BufferedReader(new FileReader(a));
+	// PushbackReader is a character-stream reader class 
+	// that allows characters to be pushed back into the Stream
+	PushbackReader arquivo;
+	AnaliseLexica(String a) throws Exception{		
+	 	this.arquivo = new PushbackReader(new FileReader(a));		
 	}
 
 	Token getNextToken() throws Exception {	
@@ -28,31 +27,22 @@ class AnaliseLexica {
 		char currchar;
 		int currchar1;
 
-		if (flag == 1) {
-			currchar = lastchar;
-			currchar1 = (int) lastchar;
-		}
-		else {
-			do {
-				currchar1 = arquivo.read(); //lendo character do arquivo
-				currchar = (char) currchar1;
-			} while (currchar == '\n' || currchar == ' ' || currchar =='\t' || currchar == '\r');
-		}
+		do {
+			currchar1 = arquivo.read(); //lendo character do arquivo
+			currchar = (char) currchar1;
+		} while (currchar == '\n' || currchar == ' ' || currchar =='\t' || currchar == '\r');
 
-		// System.out.println(currchar);
 		if (currchar1 != eof && currchar1 != 10) {
 			if (currchar >= '0' && currchar <= '9') {
-				flag = 1;
 				StringBuilder aux = new StringBuilder();
 				while (currchar >= '0' && currchar <= '9') {
 					aux.append(currchar);
 					currchar = (char) arquivo.read();
-					lastchar = currchar;
 				}
+				arquivo.unread((int) currchar);
 				return (new Token(aux.toString(), TokenType.NUM));
 			}
 			else {
-				flag = 0;
 				switch (currchar) {
 					case '(':
 						return (new Token(String.valueOf(currchar), TokenType.APar));
