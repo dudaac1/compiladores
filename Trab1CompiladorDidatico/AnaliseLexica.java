@@ -1,7 +1,7 @@
 import java.io.*;
 import java.lang.System;
 
-enum TokenType { NUM, SOMA, MULT, APar, FPar, EOF}
+enum TokenType { NUM, SOMA, MULT, APar, FPar, EOF, DIV, SUB}
 
 class Token {
 	String lexema;
@@ -51,8 +51,6 @@ class AnaliseLexica {
 				}
 				return (new Token(aux.toString(), TokenType.NUM));
 			}
-			//if (currchar >= '0' && currchar <= '9') 
-			//	return (new Token(currchar, TokenType.NUM));
 			else {
 				flag = 0;
 				switch (currchar) {
@@ -64,6 +62,10 @@ class AnaliseLexica {
 						return (new Token(String.valueOf(currchar), TokenType.SOMA));
 					case '*':
 						return (new Token(String.valueOf(currchar), TokenType.MULT));
+					case '-':
+						return (new Token(String.valueOf(currchar), TokenType.SUB));
+					case '/':
+						return (new Token(String.valueOf(currchar), TokenType.DIV));
 					default: 
 						throw (new Exception("Caractere inválido: " + ((int) currchar)));
 				}
