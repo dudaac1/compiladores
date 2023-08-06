@@ -35,13 +35,28 @@ LISTAARG -> TIPO TOKEN_id | LISTAARG "," TIPO TOKEN_id
 
 ## Correções:
 
-É possível verificar que as regras VARDECL, SEQCOMANDOS, LISTAEXP, FUNC e LISTAARG possuem recursão à esquerda. Logo, é necessário modificar a gramática, visto que o Analisador Sintático não reconhece este tipo de composição. Portanto, as regras citadas ficam da seguinte maneira:
+É possível verificar que as regras VARDECL, SEQCOMANDOS, LISTAEXP, FUNC e LISTAARG possuem recursão à esquerda. As regras COMANDO, FATOR possuem regras que tem o mesmo inicio, sendo necessário fatorá-la. Logo, é necessário modificar a gramática, visto que o Analisador Sintático não reconhece estes tipos de composições. Portanto, as regras citadas ficam da seguinte maneira:
 
 ```
 
 VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
 
 SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
+
+COMANDO -> TOKEN_id COMANDO'
+    | "if" "(" EXP ")" "then" "{" SEQCOMANDOS "}" ";"
+    | "while" "(" EXP ")" "{" SEQCOMANDOS "}" ";"
+    | "repeat" "{" SEQCOMANDOS "}" "until" "(" EXP ")" ";"
+    | "return" EXP ";" 
+    | "System.output" "(" EXP ")" ";"
+
+COMANDO' -> "(" LISTAEXP? ")" ";" | "=" COMANDO''
+
+COMANDO'' -> EXP ";" | "System.readint" "(" ")" ";"
+
+FATOR -> TOKEN_id FATOR' | TOKEN_numliteral | "true" | "false
+
+FATOR' -> "(" LISTAEXP? ")" | vazio
 
 LISTAEXP -> EXP LISTAEXP' 
 
@@ -56,3 +71,17 @@ LISTAARG -> TIPO TOKEN_id LISTAARG'
 LISTAARG' -> "," TIPO TOKEN_id LISTAARG' | vazio
 
 ```
+
+## Execução
+
+Para executar o Analisador Sintático, é necessário ter a ferramenta JavaCC instalada. 
+
+Caso você tenha Windows, sugere-se instalar o WSL do Ubuntu disponível na Microsoft Store. Após instalar o Ubuntu, atualize o sistema com `apt-get update` e, após, instale o JavaCC com `apt-get install javacc`.
+
+Os seguintes comandos deverão ser executados na linha de comando:
+
+`javacc Karloff.jj`
+
+`javac *.java`
+
+`java Karloff teste.kar`
