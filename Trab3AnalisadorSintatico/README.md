@@ -1,4 +1,21 @@
-## Regras a serem implementadas:
+## especificação
+O objetivo do trabalho é implementar um *parser* (Analisador Sintático) para a linguagem Karloff. Ele deve ser construído em cima do Analisador Léxico proposto para a mesma linguagem no Trabalho 2. Lembrando que o JavaCC não aceita recursão à esquerda nem alternativas começando com um mesmo símbolo, dessa forma, essas construções devem ser eliminadas da gramática caso existam. 
+
+Dicas:
+- todo não-terminal vira uma função;
+- todo terminal deve ser chamado por meio do seu token. Exemplo: para *main* usar < MAIN >;
+- a primeira regra deve possuir < EOF > antes de fechar sua declaração;
+- uma regra que possua a opção de "ou vazio" deve ser implementada com o símbolo ?. Exemplo: a regra `C → COM ";" C' | vazio` é apresentada do seguinte modo:
+    ```
+    void C(): {} {
+        (C() < PONTOVIRGULA > CLinha())?        
+    }
+    ```
+- o OU no JavaCC é um pipe (|) e o E um &&;
+
+Também deve ser entregue dois exemplos de programas que usem uma grande parte das construções sintáticas disponíveis na linguagem.
+
+## regras para implementar
 ```
 KARLOFF -> MAIN FUNC?
 
@@ -33,9 +50,9 @@ FUNC -> FUNC "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
 LISTAARG -> TIPO TOKEN_id | LISTAARG "," TIPO TOKEN_id
 ```
 
-## Correções:
+### correções:
 
-É possível verificar que as regras VARDECL, SEQCOMANDOS, LISTAEXP, FUNC e LISTAARG possuem recursão à esquerda. As regras COMANDO, FATOR possuem regras que tem o mesmo inicio, sendo necessário fatorá-la. Logo, é necessário modificar a gramática, visto que o Analisador Sintático não reconhece estes tipos de composições. Portanto, as regras citadas ficam da seguinte maneira:
+É possível verificar que as regras VARDECL, SEQCOMANDOS, LISTAEXP, FUNC e LISTAARG possuem recursão à esquerda. As regras COMANDO e FATOR possuem regras que tem o mesmo inicio, sendo necessário fatorá-la. Logo, é necessário modificar a gramática, visto que o Analisador Sintático não reconhece estes tipos de composições. Portanto, as regras citadas, após correções, ficam da seguinte maneira:
 
 ```
 
@@ -72,7 +89,7 @@ LISTAARG' -> "," TIPO TOKEN_id LISTAARG' | vazio
 
 ```
 
-## Execução
+## execução
 
 Para executar o Analisador Sintático, é necessário ter a ferramenta JavaCC instalada. 
 
