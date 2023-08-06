@@ -1,8 +1,8 @@
-class ArvoreSintatica{}
+class ArvoreSintatica {}
 
 class Exp extends ArvoreSintatica{}
 
-class Num extends Exp{
+class Num extends Exp {
  	int num;
 	Num(int num){this.num=num;}
 }
@@ -14,7 +14,6 @@ class Operador extends Exp{
 }
 
 class Soma extends Operador{
-	
 	Soma (Exp a1, Exp a2) { super(a1,a2);}
 }
 
