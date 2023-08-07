@@ -26,7 +26,9 @@ versão gerada no exercício 2.
 - `AnaliseLexica.java`: implementa o analisador léxico, lê o arquivo fonte e gera os tokens;
 - `Parser.java`: análise sintática da gramática;
 - `CodeGen.java`: recebe a árvore sintática do *parser* e gera o código para máquina de pilha;
-- `ArvoreSintatica.java`: contém as definições das classes da árvore sintática.
+- `ArvoreSintatica.java`: contém as definições das classes da árvore sintática;
+- [NOVO] `Interpretador.java`: a partir da expressão de entrada, após criar a árvore, realiza o cálculo da conta e apresenta o resultado;
+- [NOVO] `MaquinaPilha.java`: tem como entrada o código de máquina de pilha gerado por Compilador.java e realiza o cálculo.
 
 ## execução
 
