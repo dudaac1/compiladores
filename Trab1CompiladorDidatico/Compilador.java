@@ -14,6 +14,8 @@ class Compilador {
 			System.out.println("\n" + codigo);
 
 			// calcular resultado
+			// deveria ter sido implementado em um arquivo diferente
+			// como um novo arquivo
 			Interpretador calculo = new Interpretador();
 			int result = calculo.interpretador(arv);
 			System.out.println("\nResultado: " + result);
