@@ -1,0 +1,21 @@
+void main() {
+    newVar integer num1;
+    newVar integer num2;
+    num1 = 0;
+    num2 = 50;
+
+    repeat {
+        num1 = (num1 + 1);
+        num2 = (num2 - 2);
+    }
+    until (teste(num1, num2));
+}
+
+func bool teste(integer n1, integer n2) {
+    if ((num1 > num2)) then {
+        return true;
+    };
+    if ((num1 < num2)) then {
+        return false;
+    };
+}
