@@ -18,6 +18,9 @@ O objetivo do trabalho é implementar um Analisador Léxico para a Linguagem Kar
 ## 3️⃣: analisador sintático
 O objetivo do trabalho é implementar um *parser* (Analisador Sintático) para a linguagem Karloff. Ele deve ser construído em cima do Analisador Léxico proposto para a mesma linguagem no Trabalho 2. Lembrando que o JavaCC não aceita recursão à esquerda nem alternativas começando com um mesmo símbolo, dessa forma, essas construções devem ser eliminadas da gramática caso existam.  Também deve ser entregue dois exemplos de programas que usem uma grande parte das construções sintáticas disponíveis na linguagem. 
 
+## 4️⃣: compilador
+O objetivo do trabalho é implementar um compilador para a Linguagem Karloff, usando tradução dirigida por sintaxe, na ferramenta Javacc. Para realizar esta tarefa, é necessário adicionar ações semânticas às regras sintáticas já implementadas em Javacc, para que seja gerada uma árvore sintática do programa Karloff sendo compilado. Em seguida, o programa deve percorrer a árvore sintática gerando código Java (ou qualquer outra linguagem de programação) semanticamente equivalente ao código Karloff original.
+
 ##
 *Eduarda A. Carvalho, agosto/2023.<br>
 Última alteração: agosto/2023.<br>
