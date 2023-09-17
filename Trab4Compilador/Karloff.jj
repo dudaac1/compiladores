@@ -1,38 +1,10 @@
 PARSER_BEGIN(Karloff)
 import java.io.*;
-
-//public class Karloff {
-
-//  public static void main(String args[]) throws ParseException,IOException {
-    
-//  Karloff analisador = new Karloff(new FileInputStream(args[0]));
-//  analisador.Karloff();
-//  }
-
-//}
-
 public class Karloff {
-
-    public static void main(String args[]) throws Exception {
-
-      // Abrir o arquivo passado por linha de comando contento o código em Karloff:
-      FileInputStream file = new FileInputStream(new File(args[0]));
-      
-      // Instanciar o parser da linguagem Karloff passando como argumento o arquivo contendo o código Karloff a ser processado:
-      Karloff parser = new Karloff(file);
-      
-      // Chamar a primeira regra do parser que irá analisar o código e devolver a árvore sintática
-      ArvoreKarloff arvore = parser.Karloff();
-      System.out.println(arvore);
-
-      // passar a árvore para o gerador de código que deve gerar um arquivo .java (ou outra linguagem) com o mesmo nome do arquivo de entrada
-      geraCodigo(arvore, args[0]);
+  public static void main(String args[]) throws ParseException,IOException {  
+    Karloff analisador = new Karloff(new FileInputStream(args[0]));
+    analisador.Karloff();
   }
-
-  public static void geraCodigo(ArvoreKarloff prog, String arquivo) {
-    //??????
-  }
-
 }
 
 PARSER_END(Karloff)
@@ -90,322 +62,105 @@ TOKEN :
 {
     <NUM : (["0"-"9"])+ ((["."]) (["0"-"9"])+)? (["E"] (["+", "-"])? (["0"-"9"])+)?>
   | <ID: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9"])* (["_"] (["a"-"z", "A"-"Z","0"-"9"])+)*>
-
 }
 
-
-
-
-
-// todas as regras do sintático permanecem aqui
-// elas foram comentadas 
-
-// todas as classes sobe para ficarem entre PARSER_BEGIN e PARSER_END
-
-
-
-
-
-
-
-//KARLOFF -> MAIN FUNC?
-//void Karloff () : {} {
-//  Main() (Func())?
-//  <EOF>
-//}
-
-class ArvoreKarloff {
-  Main principal;
-  ArrayList<Func> funcoes;
-
-  ArvoreKarloff(Main principal, ArrayList<Func> funcoes) {
-    this.principal = principal;
-    this.funcoes = funcoes;
-  }
+//REGRA: KARLOFF -> MAIN FUNC?
+void Karloff () : {} {
+  Main() (Func())?
+  <EOF>
 }
 
-
-
-
-
-
-//MAIN -> "void" "main" "(" ")" "{" VARDECL SEQCOMANDOS "}"
-//void Main () : {} {
-//  <VOID> <MAIN> <APARENT> <FPARENT> <ACHAVES> VarDecl() SeqComandos() <FCHAVES>
-//}
-
-class Main() {
-  ArrayList<Comando> comandos;
-  ArrayList<VarDecl> variaveis;
-
-  Main(ArrayList<Comando> comandos, ArrayList<VarDecl> variaveis) {
-    this.comandos = comandos;
-    this.variaveis = variaveis;
-  }
+//REGRA: MAIN -> "void" "main" "(" ")" "{" VARDECL SEQCOMANDOS "}"
+void Main () : {} {
+  <VOID> <MAIN> <APARENT> <FPARENT> <ACHAVES> VarDecl() SeqComandos() <FCHAVES>
 }
 
-
-
-
-
-
-//VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
-//void VarDecl () : {} {
-//  (<NEWVAR> Tipo() <ID> <PONTOVIRG> VarDecl())?
-//}
-
-class VarDecl {
-
+//REGRA: VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
+void VarDecl () : {} {
+  (<NEWVAR> Tipo() <ID> <PONTOVIRG> VarDecl())?
 }
 
-
-
-
-
-
-//TIPO -> "integer" | "bool"
-//void Tipo () : {} {
-//  <INT> | <BOOL>
-//}
-
-class Tipo {
-
+//REGRA: TIPO -> "integer" | "bool"
+void Tipo () : {} {
+  <INT> | <BOOL>
 }
 
-
-
-
-
-
-
-//SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
-//void SeqComandos () : {} {
-//  (Comando() SeqComandos())?
-//}
-
-class SeqComandos {
-  ArrayList<Comando> comandos;
-
-  SeqComandos(ArrayList<Comando> comandos) {
-    this.comandos = comandos;
-  }
+//REGRA: SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
+void SeqComandos () : {} {
+  (Comando() SeqComandos())?
 }
 
-
-
-
-
-//COMANDO -> TOKEN_id COMANDO'
+//REGRA: COMANDO -> TOKEN_id COMANDO'
 //    | "if" "(" EXP ")" "then" "{" SEQCOMANDOS "}" ";"
 //    | "while" "(" EXP ")" "{" SEQCOMANDOS "}" ";"
 //    | "repeat" "{" SEQCOMANDOS "}" "until" "(" EXP ")" ";"
 //    | "return" EXP ";" 
 //    | "System.output" "(" EXP ")" ";"
-
-//void Comando () : {} {
-//    (<ID> ComandoLinha1())
-//  | (<IF> <APARENT> Exp() <FPARENT> <THEN> <ACHAVES> SeqComandos() <FCHAVES> <PONTOVIRG>)
-//  | (<WHILE> <APARENT> Exp() <FPARENT> <ACHAVES> SeqComandos() <FCHAVES> <PONTOVIRG>)
-//  | (<REPEAT> <ACHAVES> SeqComandos() <FCHAVES> <UNTIL> <APARENT> Exp() <FPARENT> <PONTOVIRG>)
-//  | (<RETURN> Exp() <PONTOVIRG>)
-//  | (<SYSOUT> <APARENT> Exp() <FPARENT> <PONTOVIRG>)
-//}
-
-class Comando {}
-
-class If extends Comando {
-  Exp exp;
-  ArrayList<Comando> comandos;
-
-  If(Exp exp, ArrayList<Comando> comandos) {
-    this.exp = exp;
-    this.comandos = comandos;
-  }
+void Comando () : {} {
+    (<ID> ComandoLinha1())
+  | (<IF> <APARENT> Exp() <FPARENT> <THEN> <ACHAVES> SeqComandos() <FCHAVES> <PONTOVIRG>)
+  | (<WHILE> <APARENT> Exp() <FPARENT> <ACHAVES> SeqComandos() <FCHAVES> <PONTOVIRG>)
+  | (<REPEAT> <ACHAVES> SeqComandos() <FCHAVES> <UNTIL> <APARENT> Exp() <FPARENT> <PONTOVIRG>)
+  | (<RETURN> Exp() <PONTOVIRG>)
+  | (<SYSOUT> <APARENT> Exp() <FPARENT> <PONTOVIRG>)
 }
 
-class While extends Comando {
-  Exp exp;
-  ArrayList<Comando> comandos;
-
-  While(Exp exp, ArrayList<Comando> comandos) {
-    this.exp = exp;
-    this.comandos = comandos;
-  }
+//REGRA: COMANDO' -> "(" LISTAEXP? ")" ";" | "=" COMANDO''
+void ComandoLinha1() : {} {
+  (<APARENT> (ListaExp())? <FPARENT> <PONTOVIRG>) | <ATRIB> ComandoLinha2()
 }
 
-class Repeat extends Comando {
-  ArrayList<Comando> comandos;
-  Exp exp;
-
-  Repeat(ArrayList<Comando> comandos, Exp exp) {
-    this.comandos = comandos;
-    this.exp = exp;
-  }
+//REGRA: COMANDO'' -> EXP ";" | "System.readint" "(" ")" ";"
+void ComandoLinha2() : {} {
+   (Exp() <PONTOVIRG>) | (<SYSREAD> <APARENT> <FPARENT> <PONTOVIRG>)
 }
 
-class Return extends Comando {
-  Exp exp;
-
-  Return(Exp exp) {
-    this.exp = exp;
-  }
+//REGRA: EXP -> "(" EXP OP EXP ")" | FATOR
+void Exp () : {} {
+  (<APARENT> Exp() Op() Exp() <FPARENT>) | Fator()
 }
 
-class SystemOut extends Comando {
-  Exp exp;
-
-  SystemOut(Exp exp) {
-    this.exp = exp;
-  }
+//REGRA: FATOR -> TOKEN_id FATOR' | TOKEN_numliteral | "true" | "false
+void Fator () : {} {
+  (<ID> FatorLinha()) | <NUM> | <TRUE> | <FALSE>
 }
 
-
-
-
-
-//COMANDO' -> "(" LISTAEXP? ")" ";" | "=" COMANDO''
-//void ComandoLinha1() : {} {
-//  (<APARENT> (ListaExp())? <FPARENT> <PONTOVIRG>) | <ATRIB> ComandoLinha2()
-//}
-
-
-
-
-
-
-//COMANDO'' -> EXP ";" | "System.readint" "(" ")" ";"
-//void ComandoLinha2() : {} {
-//   (Exp() <PONTOVIRG>) | (<SYSREAD> <APARENT> <FPARENT> <PONTOVIRG>)
-//}
-
-
-
-
-
-
-//EXP -> "(" EXP OP EXP ")" | FATOR
-//void Exp () : {} {
-//  (<APARENT> Exp() Op() Exp() <FPARENT>) | Fator()
-//}
-
-class Exp {}
-
-class ExpOpExp extends Exp {
-  Exp exp1;
-  Op op;
-  Exp exp2;
-
-  ExpOpExp(Exp exp1, Op op, Exp exp2) {
-    this.exp1 = exp1;
-    this.op = op;
-    this.exp2 = exp2;
-  }
+//REGRA: FATOR' -> "(" LISTAEXP? ")" | vazio
+void FatorLinha () : {} {
+  (<APARENT> (ListaExp())? <FPARENT>)?
 }
 
-
-
-
-
-
-//FATOR -> TOKEN_id FATOR' | TOKEN_numliteral | "true" | "false
-//void Fator () : {} {
-//  (<ID> FatorLinha()) | <NUM> | <TRUE> | <FALSE>
-//}
-
-class Fator extends Exp {
-
+//REGRA: OP -> "+" | "-" | "*" | "/" | "&" | "|" | "<" | ">" | "=="
+void Op () : {} {
+  <SOMA> | <SUBTR> | <MULT> | <DIV> | <AND> | <OR> | <MENORQUE> | <MAIORQUE> | <IGUAL>
 }
 
-
-
-
-
-//FATOR' -> "(" LISTAEXP? ")" | vazio
-//void FatorLinha () : {} {
-//  (<APARENT> (ListaExp())? <FPARENT>)?
-//}
-
-
-
-
-
-//OP -> "+" | "-" | "*" | "/" | "&" | "|" | "<" | ">" | "=="
-//void Op () : {} { 
-//  <SOMA> | <SUBTR> | <MULT> | <DIV> | <AND> | <OR> | <MENORQUE> | <MAIORQUE> | <IGUAL>
-//}
-
-class Op {
-  String op;
-
-  Op(String op) {
-    this.op = op;
-  }
+//REGRA: LISTAEXP -> EXP LISTAEXP' 
+void ListaExp () : {} {
+  Exp() ListaExpLinha()
 }
 
+//REGRA: LISTAEXP' -> "," EXP LISTAEXP' | vazio
+void ListaExpLinha () : {} {
+  (<VIRGULA> Exp() ListaExpLinha())?
+}
 
+//REGRA: FUNC -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
+void Func () : {} {
+  <FUNC> Tipo() <ID> <APARENT> (ListaArg())? <FPARENT> <ACHAVES> VarDecl() SeqComandos() <FCHAVES> FuncLinha()
+}
 
+//REGRA: FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC' | vazio
+void FuncLinha () : {} {
+  (<FUNC> Tipo() <ID> <APARENT> (ListaArg())? <FPARENT> <ACHAVES> VarDecl() SeqComandos() <FCHAVES> FuncLinha())?
+}
 
+//REGRA: LISTAARG -> TIPO TOKEN_id LISTAARG'
+void ListaArg () : {} {
+  Tipo() <ID> ListaArgLinha()
+}
 
-//LISTAEXP -> EXP LISTAEXP' 
-//void ListaExp () : {} {
-//  Exp() ListaExpLinha()
-//}
-
-
-
-
-
-
-
-//LISTAEXP' -> "," EXP LISTAEXP' | vazio
-//void ListaExpLinha () : {} {
-//  (<VIRGULA> Exp() ListaExpLinha())?
-//}
-
-
-
-
-
-
-
-
-//FUNC -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
-//void Func () : {} {
-//  <FUNC> Tipo() <ID> <APARENT> (ListaArg())? <FPARENT> <ACHAVES> VarDecl() SeqComandos() <FCHAVES> FuncLinha()
-//}
-
-
-
-
-
-
-
-//FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC' | vazio
-//void FuncLinha () : {} {
-//  (<FUNC> Tipo() <ID> <APARENT> (ListaArg())? <FPARENT> <ACHAVES> VarDecl() SeqComandos() <FCHAVES> FuncLinha())?
-//}
-
-
-
-
-
-
-
-//LISTAARG -> TIPO TOKEN_id LISTAARG'
-//void ListaArg () : {} {
-//  Tipo() <ID> ListaArgLinha()
-//}
-
-
-
-
-
-
-// LISTAARG' -> "," TIPO TOKEN_id LISTAARG' | vazio
-//void ListaArgLinha () : {} {
-//  (<VIRGULA> Tipo() <ID> ListaArgLinha())?
-//}
-
-class ListaArgLinha {
-
+//REGRA: LISTAARG' -> "," TIPO TOKEN_id LISTAARG' | vazio
+void ListaArgLinha () : {} {
+  (<VIRGULA> Tipo() <ID> ListaArgLinha())?
 }

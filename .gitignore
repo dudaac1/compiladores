@@ -23,6 +23,7 @@
 hs_err_pid*
 replay_pid*
 
+Trab1CompiladorDidatico/*-pilha
 Trab2AnalisadorLexico/*.java
 Trab3AnalisadorSintatico/*.java
-Trab1CompiladorDidatico/*-pilha
+Trab4Compilador/*.java
