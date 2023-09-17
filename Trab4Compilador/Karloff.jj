@@ -41,14 +41,14 @@ public class Karloff {
     VarDecl variaveis;
     SeqComandos comandos;
 
-    Main(AVarDecl variaveis, SeqComandos comandos) {
+    Main(VarDecl variaveis, SeqComandos comandos) {
       this.variaveis = variaveis;
       this.comandos = comandos;
     }
 
     @Override
     public String toString() {
-      return "void main () {" + variaveis.toString() + comandos.toString() "}";
+      return "void main () {" + variaveis.toString() + comandos.toString() + "}";
     }
   }
 
@@ -63,7 +63,7 @@ public class Karloff {
 
     @Override
     public String toString() {
-      return "newVar" tipo.toString() + id + ";"
+      return "newVar" + tipo.toString() + id + ";";
     }
   }
 
@@ -78,8 +78,8 @@ public class Karloff {
     @Override
     public String toString() {
       String variaveis = variaveis.get(0).toString(); 
-      int i = 1;
-      for (i; i < variaveis.size(); ++i) 
+      int i;
+      for (i = 1; i < variaveis.size(); ++i) 
         variaveis += variaveis.get(i).toString();
       return variaveis;
     }
@@ -209,7 +209,10 @@ public class Karloff {
       this.exps = exps;
     }
 
-    return id + exps.toString();
+    @Override
+    public String toString() {
+      return id + exps.toString();
+    }
   }
 
   // COMANDO -> TOKEN_id COMANDO'
@@ -239,7 +242,7 @@ public class Karloff {
 
     @Override
     public String toString() {
-      return "" + id + " = " + "System.readint();"
+      return "" + id + " = " + "System.readint();";
     }
   }
   
@@ -346,8 +349,8 @@ public class Karloff {
     public String toString() {
       if (exps.size() > 0) {
         String exps = exps.get(0).toString(); // exp listaexp' e listaexp' -> vazio
-        int i = 1;
-        for (i; i < exps.size(); ++i) // listaexp' -> exp listaexp'
+        int i;
+        for (i = 1; i < exps.size(); ++i) // listaexp' -> exp listaexp'
           exps += ", " + exps.get(i).toString();
         return exps;
       }
@@ -424,8 +427,8 @@ public class Karloff {
     public String toString() {
       if (args.size() > 0) {
         String args = args.get(0).toString(); // arg listaarg' e listaarg' -> vazio
-        int i = 1;
-        for (i; i < args.size(); ++i) // listaarg' -> arg listaarg'
+        int i;
+        for (i = 1; i < args.size(); ++i) // listaarg' -> arg listaarg'
           args += ", " + args.get(i).toString();
         return args;
       }
@@ -494,8 +497,8 @@ TOKEN :
 
 // KARLOFF -> MAIN FUNC?
 ArvoreKarloff Karloff () : {
-  Main principal = null,
-  ArrayList funcoes = new ArrayList();
+  Main principal = null;
+  ArrayList<Funcao> funcoes = new ArrayList();
 } {
   (
     principal = Main() 
@@ -506,7 +509,7 @@ ArvoreKarloff Karloff () : {
 
 // MAIN -> "void" "main" "(" ")" "{" VARDECL SEQCOMANDOS "}"
 main Main () : {
-  ArrayList<Variavel> variaveis = null,
+  ArrayList<Variavel> variaveis = null;
   ArrayList<Comando> comandos = null;
 } {
   <VOID> 
@@ -522,18 +525,23 @@ main Main () : {
 }
 
 // VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
-void VarDecl (ArrayList<Variavel> variaveis) : 
-{Tipo tipo} {
+void VarDecl (ArrayList<Variavel> variaveis) : {
+  Tipo tipo;
+} {
   (<NEWVAR> Tipo() <ID> <PONTOVIRG> VarDecl())?
 }
 
 // TIPO -> "integer" | "bool"
-tipo Tipo () : {} {
-  <INT> 
-  { return new Tipo("integer"); }
+Tipo Tipo () : {} {
+  (
+    <INT> 
+    { return new Tipo("integer"); }
+  )
   | 
-  <BOOL>
-  { return new Tipo("bool"); }
+  (
+    <BOOL>
+    { return new Tipo("bool"); }
+  )
 }
 
 // SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
@@ -553,8 +561,9 @@ void SeqComandos (ArrayList<Comando> comandos) : {
 //    | "repeat" "{" SEQCOMANDOS "}" "until" "(" EXP ")" ";"
 //    | "return" EXP ";" 
 //    | "System.output" "(" EXP ")" ";"
-void Comando () : {
-
+void Comando (ArrayList<Comando> comandos) : {
+  Token id;
+  Comando c;
 } {
   (
     id = <ID> 
@@ -629,7 +638,8 @@ void ComandoLinha2() : {} {
 
 // EXP -> "(" EXP OP EXP ")" | FATOR
 void Exp () : {
-  Exp exp1, Exp exp2, Op op;
+  Exp exp1, exp2;
+  Op op;
 } {
   (
     <APARENT> 
@@ -637,7 +647,6 @@ void Exp () : {
     op = Op() 
     exp2 = Exp() 
     <FPARENT>
-    { return }
   ) | 
   Fator()
 }
@@ -720,7 +729,8 @@ void Func () : {} {
 
 // FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC' | vazio
 void FuncLinha () : {
-  Token id, Tipo tipo = null;
+  Token id;
+  Tipo tipo;
 } {
   (
     <FUNC> 
