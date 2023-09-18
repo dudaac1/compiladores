@@ -2,7 +2,6 @@ PARSER_BEGIN(Karloff)
 import java.io.*;
 import java.util.ArrayList;
 
-// TIPO -> "integer" | "bool"
 class Tipo {
   String tipo;
 
@@ -31,7 +30,6 @@ class Variavel {
   }
 }
 
-// VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
 class VarDecl {
   ArrayList<Variavel> variaveis;
 
@@ -49,7 +47,6 @@ class VarDecl {
   }
 }
 
-// OP -> "+" | "-" | "*" | "/" | "&" | "|" | "<" | ">" | "=="
 class Operador {
   String operador;
 
@@ -63,12 +60,10 @@ class Operador {
   }
 }
 
-
 class Expressao {  }
 
 class Comando {  }
 
-// "if" "(" EXP ")" "then" "{" SEQCOMANDOS "}" ";"
 class If extends Comando {
   Expressao exp;
   ArrayList<Comando> comandos;
@@ -80,11 +75,13 @@ class If extends Comando {
 
   @Override
   public String toString() {
-    return "\nif (" + exp.toString() + ") then {\n" + comandos.toString() + "\n};";
+    String com = "";
+    for (Comando c : comandos) 
+      com = com.concat(c.toString());
+    return "if (" + exp.toString() + ") then {\n" + com + "};\n";
   }
 }
 
-// "while" "(" EXP ")" "{" SEQCOMANDOS "}" ";"
 class While extends Comando {
   Expressao exp;
   ArrayList<Comando> comandos;
@@ -99,11 +96,10 @@ class While extends Comando {
     String com = "";
     for (Comando c: comandos)
       com = com.concat(c.toString());
-    return "\nwhile (" + exp.toString() + ") {\n" + com + "\n};";
+    return "while (" + exp.toString() + ") {" + com + "\n};\n";
   }
 }
 
-// "repeat" "{" SEQCOMANDOS "}" "until" "(" EXP ")" ";"
 class Repeat extends Comando {
   ArrayList<Comando> comandos;
   Expressao exp;
@@ -115,11 +111,13 @@ class Repeat extends Comando {
 
   @Override
   public String toString() {
-    return "\nrepeat {\n" + comandos.toString() + "\n} until (" + exp.toString() + ");";
+    String com = "";
+    for (Comando c : comandos) 
+      com = com.concat(c.toString());
+    return "repeat {\n" + com + "} until (" + exp.toString() + ");\n";
   }
 }
 
-// "return" EXP ";" 
 class Return extends Comando {
   Expressao exp;
 
@@ -129,11 +127,10 @@ class Return extends Comando {
 
   @Override
   public String toString() {
-    return "\nreturn " + exp.toString() + ";";
+    return "return " + exp.toString() + ";\n";
   }
 }
 
-// "System.output" "(" EXP ")" ";"
 class SystemOut extends Comando {
   Expressao exp;
 
@@ -143,28 +140,10 @@ class SystemOut extends Comando {
 
   @Override
   public String toString() {
-    return "\nSystem.output(" + exp.toString() + ");";
+    return "System.output(" + exp.toString() + ");\n";
   }
 }
 
-// SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
-class SeqComandos {
-  ArrayList<Comando> comandos;
-
-  SeqComandos(ArrayList<Comando> comandos) {
-    this.comandos = comandos;
-  }
-
-  @Override
-  public String toString() {
-    String comandos = "";
-    for (Comando c : this.comandos)
-      comandos = comandos.concat(c.toString() + "");
-    return comandos;
-  }
-}
-
-// EXP -> "(" EXP OP EXP ")" 
 class Operacao extends Expressao {
   Expressao exp1;
   Operador op;
@@ -182,8 +161,6 @@ class Operacao extends Expressao {
   }
 }
 
-// COMANDO -> TOKEN_id COMANDO'
-// COMANDO' -> "(" LISTAEXP? ")" ";" 
 class ChamadaFuncao extends Fator { 
   String id;
   ArrayList<Expressao> exps;
@@ -195,7 +172,10 @@ class ChamadaFuncao extends Fator {
 
   @Override
   public String toString() {
-    return id + exps.toString();
+    String expressoes = exps.get(0).toString();
+    for (int i = 1; i < exps.size(); i++)
+      expressoes = expressoes.concat(", " + exps.get(i).toString());
+    return id + "("+ expressoes + ")";
   }
 }
 
@@ -212,14 +192,10 @@ class ComandoChamaFuncao extends Comando {
   }
 }
 
-// COMANDO -> TOKEN_id COMANDO'
 class AtribId extends Comando {
   String id;
 }
 
-// COMANDO -> TOKEN_id COMANDO'
-// COMANDO' -> "=" COMANDO''  
-// COMANDO'' -> EXP ";" 
 class AtribExp extends AtribId {
   Expressao exp;
 
@@ -230,13 +206,10 @@ class AtribExp extends AtribId {
 
   @Override
   public String toString() {
-    return "\n" + id + " = " + exp.toString() + ";";
+    return "" + id + " = " + exp.toString() + ";\n";
   }
 }
 
-// COMANDO -> TOKEN_id COMANDO'
-// COMANDO' -> "=" COMANDO2
-// COMANDO'' -> "System.readint" "(" ")" ";" 
 class AtribRead extends AtribId {
   AtribRead(String id) {
     this.id = id;
@@ -244,13 +217,10 @@ class AtribRead extends AtribId {
 
   @Override
   public String toString() {
-    return "" + id + " = " + "System.readint();";
+    return "" + id + " = " + "System.readint();\n";
   }
 }
 
-// EXP -> FATOR
-// FATOR -> TOKEN_id FATOR'
-// FATOR' -> "(" LISTAEXP? ")"
 class Fator extends Expressao { }
 
 class FatorListaExp extends Fator {
@@ -268,13 +238,6 @@ class FatorListaExp extends Fator {
   }
 }
 
-// EXP -> FATOR
-// FATOR -> TOKEN_id FATOR'
-// FATOR' -> vazio
-// ???
-
-// EXP -> FATOR
-// FATOR -> TOKEN_numliteral
 class FatorNum extends Fator {
   String num;
 
@@ -288,8 +251,6 @@ class FatorNum extends Fator {
   }
 }
 
-// EXP -> FATOR
-// FATOR -> "true"
 class FatorTrue extends Fator {
   @Override
   public String toString() {
@@ -297,8 +258,6 @@ class FatorTrue extends Fator {
   }
 }
 
-// EXP -> FATOR
-// FATOR -> "false"
 class FatorFalse extends Fator {
   @Override
   public String toString() {
@@ -333,33 +292,6 @@ class ExpressaoFator extends Expressao {
   }
 }
 
-// LISTAEXP -> EXP LISTAEXP' 
-// LISTAEXP' -> "," EXP LISTAEXP'
-class ListaExp {
-  ArrayList<Expressao> exps;
-
-  ListaExp(ArrayList<Expressao> exps) {
-    this.exps = exps;
-  }
-
-  public void add(Expressao e) {
-    this.exps.add(e);
-  }
-
-  @Override
-  public String toString() {
-    if (exps.size() > 0) {
-      String exps = this.exps.get(0).toString(); // exp listaexp' e listaexp' -> vazio
-      int i;
-      for (i = 1; i < this.exps.size(); ++i) // listaexp' -> exp listaexp'
-        exps = exps.concat(", " + this.exps.get(i).toString());
-      return exps;
-    }
-    return ""; // listaexp?
-  }
-}
-
-// TIPO TOKEN_id
 class Argumento {
   Tipo tipo;
   String id;
@@ -371,48 +303,16 @@ class Argumento {
 
   @Override
   public String toString() {
-    return tipo.toString()+ id;
+    return tipo.toString() + " " + id;
   }
 }
 
-// LISTAARG -> TIPO TOKEN_id LISTAARG'
-// LISTAARG' -> "," TIPO TOKEN_id LISTAARG'
-class ListaArg {
-  ArrayList<Argumento> args;
-
-  ListaArg(ArrayList<Argumento> args) {
-    this.args = args;
-  }
-
-  public void add(Argumento a) {
-    this.args.add(a);
-  }
-
-  @Override
-  public String toString() {
-    if (args.size() > 0) {
-      String args = this.args.get(0).toString(); // arg listaarg' e listaarg' -> vazio
-      int i;
-      for (i = 1; i < this.args.size(); ++i) // listaarg' -> arg listaarg'
-        args = args.concat(", " + this.args.get(i).toString());
-      return args;
-    }
-    return ""; // listaarg?
-  }
-}
-
-
-
-// FUNC -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
-// FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
 class Funcao {
   Tipo tipo;
   String id;
   ArrayList<Argumento> args;
   ArrayList<Variavel> variaveis;
   ArrayList<Comando> seq_comandos;
-  // ArrayList<Variavel> variaveis;
-  // ArrayList<Comando> comandos;
 
   Funcao(Tipo tipo, String id, ArrayList<Argumento> args, ArrayList<Variavel> vars, ArrayList<Comando> comandos) {
     this.tipo = tipo;
@@ -424,44 +324,22 @@ class Funcao {
 
   @Override
   public String toString() {
-    String argumentos = "";
-    for (Argumento a : args) 
-      argumentos = argumentos.concat(a.toString());
+    String argumentos = args.get(0).toString();
+    for (int i = 1; i < args.size(); i++)
+      argumentos = argumentos.concat(", " + args.get(i).toString());
 
     String vars = "";
     for (Variavel v : variaveis) 
-      vars = vars.concat(v.toString() + "\n");
+      vars = vars.concat(v.toString());
 
     String comandos = "";
     for (Comando c : seq_comandos) 
-      comandos = comandos.concat(c.toString() + "\n");
+      comandos = comandos.concat(c.toString());
 
-    return "func " + tipo.toString() + id + "(" + argumentos + ") {\n" + vars + comandos + "\n}\n";
+    return "\n\nfunc " + tipo.toString() + " " + id + "(" + argumentos + ") {\n" + vars + comandos + "}";
   }
 }
 
-// FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC' | vazio
-class Funcoes {
-  ArrayList<Funcao> funcoes;
-
-  Funcoes(ArrayList<Funcao> funcoes) {
-    this.funcoes = funcoes;
-  }
-
-  public void add(Funcao f) {
-    this.funcoes.add(f);
-  }
-
-  @Override
-  public String toString() {
-    String funcoes = "";
-    for (Funcao f : this.funcoes)
-      funcoes = funcoes.concat(f.toString());
-    return funcoes;
-  }
-}
-  
-// MAIN -> "void" "main" "(" ")" "{" VARDECL SEQCOMANDOS "}"
 class Main {
   ArrayList<Variavel> variaveis;
   ArrayList<Comando> seq_comandos;
@@ -480,11 +358,10 @@ class Main {
     for (Comando c : seq_comandos) 
       comandos = comandos.concat(c.toString());
     
-    return "void main () {\n" + vars + comandos + "\n}";
+    return "void main () {\n" + vars + comandos + "}";
   }
 }
 
-// KARLOFF -> MAIN FUNC?
 class ArvoreKarloff {
   Main principal;
   ArrayList<Funcao> funcoes;
@@ -582,7 +459,7 @@ ArvoreKarloff Karloff () : {
 } {
   (
     principal = Main() 
-    (Func(funcoes))?
+    [Func(funcoes)]//?
     <EOF>
   )
   { return new ArvoreKarloff(principal, funcoes); }
@@ -631,8 +508,6 @@ Tipo Tipo () : {} {
     <BOOL>
     { return new Tipo("bool"); }
   )
-
-  // { return result; }
 }
 
 // // SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
@@ -659,7 +534,6 @@ Comando Comando () : {
   Token id = null;
   Comando c = null;
   Expressao exp = null;
-  // ArrayList<Expressao> exps = new ArrayList<Expressao>();
   ArrayList<Comando> comandos = new ArrayList();
 } {
   (
