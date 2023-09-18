@@ -39,11 +39,10 @@ class VarDecl {
 
   @Override
   public String toString() {
-    String variaveis = this.variaveis.get(0).toString(); 
-    int i;
-    for (i = 1; i < this.variaveis.size(); ++i) 
-      variaveis = variaveis.concat(this.variaveis.get(i).toString());
-    return variaveis;
+    String vars = ""; 
+    for (Variavel v : variaveis)
+      vars = vars.concat(v.toString());
+    return vars;
   }
 }
 
@@ -96,7 +95,7 @@ class While extends Comando {
     String com = "";
     for (Comando c: comandos)
       com = com.concat(c.toString());
-    return "while (" + exp.toString() + ") {" + com + "\n};\n";
+    return "while (" + exp.toString() + ") {\n" + com + "};\n";
   }
 }
 
@@ -749,10 +748,10 @@ void Func (ArrayList<Funcao> funcoes) : {
   tipo = Tipo() 
   id = <ID> 
   <APARENT> 
-  (ListaArg(args))? 
+  [ListaArg(args)]//? 
   <FPARENT> 
   <ACHAVES> 
-  VarDecl(variaveis) 
+  [VarDecl(variaveis)]
   SeqComandos(comandos) 
   { 
     funcao = new Funcao(tipo, id.image, args, variaveis, comandos);

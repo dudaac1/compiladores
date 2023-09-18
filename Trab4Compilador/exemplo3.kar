@@ -12,12 +12,10 @@ void main() {
 }
 
 func bool teste(integer n1, integer n2) {
-    newVar bool result;
     if ((n1 > n2)) then {
-        result = true;
+        return true;
     };
     if ((n1 < n2)) then {
-        result = false;
+        return false;
     };
-    return result;
 }
