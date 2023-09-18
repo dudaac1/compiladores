@@ -96,7 +96,10 @@ class While extends Comando {
 
   @Override
   public String toString() {
-    return "\nwhile (" + exp.toString() + ") {\n" + comandos.toString() + "\n};";
+    String com = "";
+    for (Comando c: comandos)
+      com = com.concat(c.toString());
+    return "\nwhile (" + exp.toString() + ") {\n" + com + "\n};";
   }
 }
 
@@ -300,6 +303,19 @@ class FatorFalse extends Fator {
   @Override
   public String toString() {
     return "false";
+  }
+}
+
+class FatorVar extends Fator {
+  String id;
+
+  FatorVar(String id) {
+    this.id = id;
+  }
+
+  @Override
+  public String toString() {
+    return id;
   }
 }
 
@@ -798,6 +814,8 @@ Fator Fator () : {
       <FPARENT>
       { return new ChamadaFuncao(t.image, exps); }
     ]
+    { return new FatorVar(t.image); }
+
     // FatorLinha(t.image, exps)
   ) | (
     t = <NUM> 
