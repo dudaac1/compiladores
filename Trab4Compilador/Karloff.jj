@@ -161,11 +161,6 @@ class SeqComandos {
   }
 }
 
-// COMANDO -> TOKEN_id COMANDO'
-class ComandoId extends Comando {
-  String id;
-}
-
 // EXP -> "(" EXP OP EXP ")" 
 class Operacao extends Expressao {
   Expressao exp1;
@@ -186,7 +181,8 @@ class Operacao extends Expressao {
 
 // COMANDO -> TOKEN_id COMANDO'
 // COMANDO' -> "(" LISTAEXP? ")" ";" 
-class ChamadaFuncao extends ComandoId { 
+class ChamadaFuncao extends Fator { 
+  String id;
   ArrayList<Expressao> exps;
 
   ChamadaFuncao(String id, ArrayList<Expressao> exps) {
@@ -200,10 +196,28 @@ class ChamadaFuncao extends ComandoId {
   }
 }
 
+class ComandoChamaFuncao extends Comando {
+  ChamadaFuncao chamada;
+
+  ComandoChamaFuncao(ChamadaFuncao chamada) {
+    this.chamada = chamada;
+  }
+
+  @Override
+  public String toString() {
+    return chamada.toString();
+  }
+}
+
+// COMANDO -> TOKEN_id COMANDO'
+class AtribId extends Comando {
+  String id;
+}
+
 // COMANDO -> TOKEN_id COMANDO'
 // COMANDO' -> "=" COMANDO''  
 // COMANDO'' -> EXP ";" 
-class AtribExp extends ComandoId {
+class AtribExp extends AtribId {
   Expressao exp;
 
   AtribExp(String id, Expressao exp) {
@@ -220,7 +234,7 @@ class AtribExp extends ComandoId {
 // COMANDO -> TOKEN_id COMANDO'
 // COMANDO' -> "=" COMANDO2
 // COMANDO'' -> "System.readint" "(" ")" ";" 
-class AtribRead extends ComandoId {
+class AtribRead extends AtribId {
   AtribRead(String id) {
     this.id = id;
   }
@@ -234,9 +248,11 @@ class AtribRead extends ComandoId {
 // EXP -> FATOR
 // FATOR -> TOKEN_id FATOR'
 // FATOR' -> "(" LISTAEXP? ")"
-class FatorListaExp extends Expressao {
+class Fator extends Expressao { }
+
+class FatorListaExp extends Fator {
   String id;
-  ArrayList<Expressao> exps; // desse jeito ta errada, obrigada a ter um Exp
+  ArrayList<Expressao> exps; 
 
   FatorListaExp(String id, ArrayList<Expressao> exps) {
     this.id = id;
@@ -256,7 +272,7 @@ class FatorListaExp extends Expressao {
 
 // EXP -> FATOR
 // FATOR -> TOKEN_numliteral
-class FatorNum extends Expressao {
+class FatorNum extends Fator {
   String num;
 
   FatorNum(String num) {
@@ -271,7 +287,7 @@ class FatorNum extends Expressao {
 
 // EXP -> FATOR
 // FATOR -> "true"
-class FatorTrue extends Expressao {
+class FatorTrue extends Fator {
   @Override
   public String toString() {
     return "true";
@@ -280,13 +296,26 @@ class FatorTrue extends Expressao {
 
 // EXP -> FATOR
 // FATOR -> "false"
-class FatorFalse extends Expressao {
+class FatorFalse extends Fator {
   @Override
   public String toString() {
     return "false";
   }
 }
 
+
+class ExpressaoFator extends Expressao {
+  Fator fator;
+
+  ExpressaoFator(Fator fator) {
+    this.fator = fator;
+  }
+
+  @Override
+  public String toString() {
+    return fator.toString();
+  }
+}
 
 // LISTAEXP -> EXP LISTAEXP' 
 // LISTAEXP' -> "," EXP LISTAEXP'
@@ -659,7 +688,7 @@ Comando ComandoLinha1(String id) : {
     <FPARENT> 
     <PONTOVIRG>
     { 
-      c = new ChamadaFuncao(id, exps); 
+      c = new ComandoChamaFuncao(new ChamadaFuncao(id, exps)); 
       return c;
     }
   ) | (
@@ -715,52 +744,60 @@ Operador Op () : {
 
 // EXP -> "(" EXP OP EXP ")" | FATOR
 Expressao Exp () : {
-  Expressao exp1, exp2, result = null;
+  Expressao exp1, exp2;
   Operador op;
+  Fator f;
 } {
   (
     <APARENT> 
     exp1 = Exp() 
     op = Op() 
     exp2 = Exp() 
-    { result = new Operacao(exp1, op, exp2); }
     <FPARENT>
+    { return new Operacao(exp1, op, exp2); }
   ) | (
-    Fator()
+    f = Fator()
+    { return new ExpressaoFator(f); }
   )
 
-  { return result; }
+  // { return result; }
 }
 
 // FATOR -> TOKEN_id FATOR' | TOKEN_numliteral | "true" | "false
-void Fator () : {
+Fator Fator () : {
   Token t;
   ArrayList<Expressao> exps = new ArrayList();
 } {
   (
     t = <ID> 
-    FatorLinha(t.image, exps)
+    [
+      <APARENT> 
+      (ListaExp(exps))? 
+      <FPARENT>
+      { return new ChamadaFuncao(t.image, exps); }
+    ]
+    // FatorLinha(t.image, exps)
   ) | (
     t = <NUM> 
-    { exps.add(new FatorNum(t.image)); }
+    { return new FatorNum(t.image); }
   ) | (
     t = <TRUE> 
-    { exps.add(new FatorTrue()); }
+    { return new FatorTrue(); }
   ) | (
     t = <FALSE>
-    { exps.add(new FatorFalse()); }
+    { return new FatorFalse(); }
   )
 }
 
 // FATOR' -> "(" LISTAEXP? ")" | vazio
-void FatorLinha (String id, ArrayList<Expressao> exps) : {} {
-  (
-    <APARENT> 
-    (ListaExp(exps))? 
-    <FPARENT>
-    { exps.add(new FatorListaExp(id, exps)); }
-  )?
-}
+// void FatorLinha (String id, ArrayList<Expressao> exps) : {} {
+//   (
+//     <APARENT> 
+//     (ListaExp(exps))? 
+//     <FPARENT>
+//     { exps.add(new FatorListaExp(id, exps)); }
+//   )?
+// }
 
 
 
