@@ -11,7 +11,12 @@ class Tipo {
 
   @Override
   public String toString() {
-    return tipo;
+    String t;
+    if (tipo == "integer")
+      t = "int";
+    else
+      t = "int";
+    return t;
   }
 }
 
@@ -26,7 +31,8 @@ class Variavel {
 
   @Override
   public String toString() {
-    return "newVar " + tipo.toString() + " " + nome + ";\n";
+    // return "newVar " + tipo.toString() + " " + nome + ";\n";
+    return tipo.toString() + " " + nome + ";\n";
   }
 }
 
@@ -77,7 +83,8 @@ class If extends Comando {
     String com = "";
     for (Comando c : comandos) 
       com = com.concat(c.toString());
-    return "if (" + exp.toString() + ") then {\n" + com + "};\n";
+    // return "if (" + exp.toString() + ") then {\n" + com + "};\n";
+    return "if (" + exp.toString() + ") {\n" + com + "}\n";
   }
 }
 
@@ -95,7 +102,7 @@ class While extends Comando {
     String com = "";
     for (Comando c: comandos)
       com = com.concat(c.toString());
-    return "while (" + exp.toString() + ") {\n" + com + "};\n";
+    return "while (" + exp.toString() + ") {\n" + com + "}\n";
   }
 }
 
@@ -113,7 +120,8 @@ class Repeat extends Comando {
     String com = "";
     for (Comando c : comandos) 
       com = com.concat(c.toString());
-    return "repeat {\n" + com + "} until (" + exp.toString() + ");\n";
+    // return "repeat {\n" + com + "} until (" + exp.toString() + ");\n";
+    return "do {\n" + com + "} while (" + exp.toString() + ");\n";
   }
 }
 
@@ -139,7 +147,8 @@ class SystemOut extends Comando {
 
   @Override
   public String toString() {
-    return "System.output(" + exp.toString() + ");\n";
+    // return "System.output(" + exp.toString() + ");\n";
+    return "printf(" + exp.toString() + ");\n";
   }
 }
 
@@ -156,7 +165,8 @@ class Operacao extends Expressao {
 
   @Override
   public String toString() {
-    return "(" + exp1 + op.toString()+ exp2 + ")";
+    // return "(" + exp1 + op.toString()+ exp2 + ")";
+    return exp1 + " " + op.toString() +  " " + exp2;
   }
 }
 
@@ -216,7 +226,8 @@ class AtribRead extends AtribId {
 
   @Override
   public String toString() {
-    return "" + id + " = " + "System.readint();\n";
+    // return "" + id + " = " + "System.readint();\n";
+    return id + "= scanf();\n";
   }
 }
 
@@ -233,7 +244,7 @@ class FatorListaExp extends Fator {
 
   @Override 
   public String toString() {
-    return id + " (" + exps.toString() + ")";
+    return id + "(" + exps.toString() + ");";
   }
 }
 
@@ -253,14 +264,16 @@ class FatorNum extends Fator {
 class FatorTrue extends Fator {
   @Override
   public String toString() {
-    return "true";
+    // return "true";
+    return "1";
   }
 }
 
 class FatorFalse extends Fator {
   @Override
   public String toString() {
-    return "false";
+    // return "false";
+    return "0";
   }
 }
 
@@ -335,7 +348,8 @@ class Funcao {
     for (Comando c : seq_comandos) 
       comandos = comandos.concat(c.toString());
 
-    return "\n\nfunc " + tipo.toString() + " " + id + "(" + argumentos + ") {\n" + vars + comandos + "}";
+    // return "\n\nfunc " + tipo.toString() + " " + id + "(" + argumentos + ") {\n" + vars + comandos + "}";
+    return "\n\n" + tipo.toString() + " " + id + "(" + argumentos + ") {\n" + vars + comandos + "}";
   }
 }
 
@@ -357,7 +371,7 @@ class Main {
     for (Comando c : seq_comandos) 
       comandos = comandos.concat(c.toString());
     
-    return "void main () {\n" + vars + comandos + "}";
+    return "#include <stdio.h>\n#include <stdlib.h>\nint main () {\n" + vars + comandos + "return 0;\n}";
   }
 }
 
