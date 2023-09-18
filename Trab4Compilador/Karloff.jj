@@ -56,9 +56,9 @@ public class Karloff {
     Tipo tipo;
     String nome;
 
-    VarDecl(Tipo tipo, String nome) {
+    Variavel(Tipo tipo, String nome) {
       this.tipo = tipo;
-      this.nome = nome_var;
+      this.nome = nome;
     }
 
     @Override
@@ -202,9 +202,9 @@ public class Karloff {
   // COMANDO -> TOKEN_id COMANDO'
   // COMANDO' -> "(" LISTAEXP? ")" ";" 
   class IdListaExp extends ComandoId { 
-    ListaExp exps;
+    ListaExpressao exps;
 
-    IdListaExp(String id, ListaExp exps) {
+    IdListaExp(String id, ListaExpressao exps) {
       this.id = id;
       this.exps = exps;
     }
@@ -271,9 +271,9 @@ public class Karloff {
   // FATOR' -> "(" LISTAEXP? ")"
   class FatorListaExp extends Expressao {
     String id;
-    ListaExp exps; // desse jeito ta errada, obrigada a ter um Exp
+    ListaExpressao exps; // desse jeito ta errada, obrigada a ter um Exp
 
-    FatorListaExp(String id, ListaExp exps) {
+    FatorListaExp(String id, ListaExpressao exps) {
       this.id = id;
       this.exps = exps;
     }
@@ -294,7 +294,7 @@ public class Karloff {
   class FatorNum extends Expressao {
     Double num;
 
-    FatorNumLit(Double num) {
+    FatorNum(Double num) {
       this.num = num;
     }
 
@@ -385,7 +385,7 @@ public class Karloff {
   class Funcoes {
     ArrayList<Funcao> funcoes;
 
-    FuncLinha(ArrayList<Funcao> funcoes) {
+    Funcoes(ArrayList<Funcao> funcoes) {
       this.funcoes = funcoes;
     }
 
@@ -403,7 +403,7 @@ public class Karloff {
     Tipo tipo;
     String id;
 
-    ListaArg(Tipo tipo, String id) {
+    Argumento(Tipo tipo, String id) {
       this.tipo = tipo;
       this.id = id;
     }
@@ -525,10 +525,22 @@ main Main () : {
 }
 
 // VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
-void VarDecl (ArrayList<Variavel> variaveis) : {
+ArrayList<Variavel> VarDecl (ArrayList<Variavel> variaveis) : {
   Tipo tipo;
+  Token id;
+  Variavel var;
 } {
-  (<NEWVAR> Tipo() <ID> <PONTOVIRG> VarDecl())?
+  (
+    <NEWVAR>
+    tipo = Tipo()
+    id = <ID>
+    <PONTOVIRG>
+    { 
+      variaveis.add(new Variavel(tipo, id.image())); 
+      return variaveis;
+    }
+    // VarDecl(variaveis)
+  )?
 }
 
 // TIPO -> "integer" | "bool"
@@ -546,7 +558,7 @@ Tipo Tipo () : {} {
 
 // SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
 void SeqComandos (ArrayList<Comando> comandos) : {
-  Comando c;
+  Comando c = null;
 } {
   (
     c = Comando()
@@ -561,94 +573,102 @@ void SeqComandos (ArrayList<Comando> comandos) : {
 //    | "repeat" "{" SEQCOMANDOS "}" "until" "(" EXP ")" ";"
 //    | "return" EXP ";" 
 //    | "System.output" "(" EXP ")" ";"
-void Comando (ArrayList<Comando> comandos) : {
-  Token id;
-  Comando c;
+void Comando (ArrayList<Comando> comandos, ArrayList<Exp> lista_exp) : {
+  Token id = null;
+  Comando c = null;
+  Expressao exp = null;
 } {
   (
     id = <ID> 
-    ComandoLinha1()
+    c = ComandoLinha1(id, lista_exp)
   ) | (
     <IF> 
     <APARENT> 
-    Exp() 
+    exp = Expressao() 
     <FPARENT> 
     <THEN> 
     <ACHAVES> 
-    SeqComandos() 
+    SeqComandos(comandos) 
     <FCHAVES> 
     <PONTOVIRG>
   ) | (
     <WHILE> 
     <APARENT> 
-    Exp() 
+    exp = Expressao() 
     <FPARENT> 
     <ACHAVES> 
-    SeqComandos() 
+    SeqComandos(comandos) 
     <FCHAVES> 
     <PONTOVIRG>
   ) | (
     <REPEAT>
     <ACHAVES>
-    SeqComandos()
+    SeqComandos(comandos)
     <FCHAVES> 
     <UNTIL> 
     <APARENT> 
-    Exp() 
+    exp = Expressao() 
     <FPARENT> 
     <PONTOVIRG>
   ) | (
     <RETURN> 
-    Exp() 
+    exp = Expressao() 
     <PONTOVIRG>
   ) | (
     <SYSOUT> 
     <APARENT> 
-    Exp() 
+    exp = Expressao() 
     <FPARENT> 
     <PONTOVIRG>
   )
 }
 
 // COMANDO' -> "(" LISTAEXP? ")" ";" | "=" COMANDO''
-void ComandoLinha1() : {} {
+Comando ComandoLinha1(String id, ArrayList<Exp> lista_exp) : {} {
   (
     <APARENT> 
-    (ListaExp())? 
+    (ListaExp(lista_exp))? 
     <FPARENT> 
     <PONTOVIRG>
+    { return new IdListaExp(id, lista_exp); }
   ) | (
     <ATRIB> 
-    ComandoLinha2()
+    ComandoLinha2(id)
   )
 }
 
 // COMANDO'' -> EXP ";" | "System.readint" "(" ")" ";"
-void ComandoLinha2() : {} {
+Comando ComandoLinha2(String id) : {
+  Expressao exp;
+} {
    (
-    Exp() 
+    exp = Expressao() 
     <PONTOVIRG>
+    { return new AtribExp(id, exp); }
   ) | (
     <SYSREAD> 
     <APARENT> 
     <FPARENT> 
     <PONTOVIRG>
+    { return new AtribRead(id); }
   )
 }
 
 // EXP -> "(" EXP OP EXP ")" | FATOR
-void Exp () : {
-  Exp exp1, exp2;
+Expressao Exp () : {
+  Expressao exp1, exp2;
   Op op;
 } {
   (
     <APARENT> 
-    exp1 = Exp() 
+    exp1 = Expressao() 
     op = Op() 
-    exp2 = Exp() 
+    exp2 = Expressao() 
+    { return new Expressao(exp1, op, exp2); }
     <FPARENT>
-  ) | 
-  Fator()
+  ) | (
+    Fator()
+  )
 }
 
 // FATOR -> TOKEN_id FATOR' | TOKEN_numliteral | "true" | "false
@@ -668,14 +688,14 @@ void Fator () : {
 void FatorLinha () : {} {
   (
     <APARENT> 
-    (ListaExp())? 
+    (ListaExpressao())? 
     <FPARENT>
   )?
 }
 
 // OP -> "+" | "-" | "*" | "/" | "&" | "|" | "<" | ">" | "=="
 Operador Op () : {
- Token t;
+ Token op;
 } {
   (
     op = <SOMA> | 
@@ -688,25 +708,25 @@ Operador Op () : {
     op = <MAIORQUE> | 
     op = <IGUAL>
   )
-  { return new Operador(t.image); }
+  { return new Operador(op.image); }
 }
 
 // LISTAEXP -> EXP LISTAEXP' 
 void ListaExp (ArrayList<Exp> listaExp) : {
-  Exp exp;
+  Expressao exp;
 } {
-  exp = Exp() 
+  exp = Expressao() 
   { listaExp.add(exp); }
   ListaExpLinha(listaExp)
 }
 
 // LISTAEXP' -> "," EXP LISTAEXP' | vazio
 void ListaExpLinha (ArrayList<Exp> listaExp) : {
-  Exp exp;
+  Expressao exp;
 } {
   (
     <VIRGULA> 
-    exp = Exp() 
+    exp = Expressao() 
     { listaExp.add(exp); }
     ListaExpLinha(listaExp)
   )?
