@@ -1,6 +1,13 @@
 void main() {
     newVar integer n1;
     newVar integer n2;
-    n1 = 6;
+    newVar integer outra_var;
+    n1 = 1;
     n2 = 7;
+    if ((n2 > n1)) then {
+        while ((n1 < n2)) {
+            n1 = (n1 + 1);
+        };
+    };
+    outra_var = (((5 + 4) * (7 - 2)) + 100);
 }

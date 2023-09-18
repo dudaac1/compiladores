@@ -403,8 +403,14 @@ public class Karloff {
   
   // deve gerar um arquivo .java (ou outra linguagem) 
   // com o mesmo nome do arquivo de entrada
-  public static void gerarCodigo(ArvoreKarloff arvore, String arquivo) throws Exception {
-    System.out.println(arvore.toString());
+  public static void gerarCodigo(ArvoreKarloff arvore, String caminho) throws Exception {
+    String arvore_string = arvore.toString();
+    System.out.println(arvore_string);
+    File arquivo = new File("saida/" + caminho);
+    arquivo.createNewFile();
+    FileOutputStream saida = new FileOutputStream(arquivo);
+    // saida.write(arvore_string);
+    saida.write(arvore_string.getBytes());
   }
 }
 
