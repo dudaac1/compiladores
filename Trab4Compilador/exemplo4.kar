@@ -1,0 +1,6 @@
+void main() {
+    newVar integer n1;
+    newVar integer n2;
+    n1 = 6;
+    n2 = 7;
+}

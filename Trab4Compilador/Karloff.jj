@@ -2,440 +2,453 @@ PARSER_BEGIN(Karloff)
 import java.io.*;
 import java.util.ArrayList;
 
-public class Karloff {
+// TIPO -> "integer" | "bool"
+class Tipo {
+  String tipo;
 
+  Tipo(String tipo) {
+    this.tipo = tipo;
+  }
+
+  @Override
+  public String toString() {
+    return tipo;
+  }
+}
+
+class Variavel {
+  Tipo tipo;
+  String nome;
+
+  Variavel(Tipo tipo, String nome) {
+    this.tipo = tipo;
+    this.nome = nome;
+  }
+
+  @Override
+  public String toString() {
+    return "newVar" + tipo.toString() + nome + ";";
+  }
+}
+
+// VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
+class VarDecl {
+  ArrayList<Variavel> variaveis;
+
+  VarDecl(ArrayList<Variavel> variaveis) {
+    this.variaveis = variaveis;
+  }
+
+  @Override
+  public String toString() {
+    String variaveis = this.variaveis.get(0).toString(); 
+    int i;
+    for (i = 1; i < this.variaveis.size(); ++i) 
+      variaveis += this.variaveis.get(i).toString();
+    return variaveis;
+  }
+}
+
+// OP -> "+" | "-" | "*" | "/" | "&" | "|" | "<" | ">" | "=="
+class Operador {
+  String operador;
+
+  Operador(String operador) {
+    this.operador = operador;
+  }
+
+  @Override
+  public String toString() {
+    return operador;
+  }
+}
+
+
+class Expressao {  }
+
+class Comando {  }
+
+// "if" "(" EXP ")" "then" "{" SEQCOMANDOS "}" ";"
+class If extends Comando {
+  Expressao exp;
+  ArrayList<Comando> comandos;
+
+  If(Expressao exp, ArrayList<Comando> comandos) {
+    this.exp = exp;
+    this.comandos = comandos;
+  }
+
+  @Override
+  public String toString() {
+    return "if (" + exp.toString() + ") then {" + comandos.toString() + "};";
+  }
+}
+
+// "while" "(" EXP ")" "{" SEQCOMANDOS "}" ";"
+class While extends Comando {
+  Expressao exp;
+  ArrayList<Comando> comandos;
+
+  While(Expressao exp, ArrayList<Comando> comandos) {
+    this.exp = exp;
+    this.comandos = comandos;
+  }
+
+  @Override
+  public String toString() {
+    return "while (" + exp.toString() + ") {" + comandos.toString() + "};";
+  }
+}
+
+// "repeat" "{" SEQCOMANDOS "}" "until" "(" EXP ")" ";"
+class Repeat extends Comando {
+  ArrayList<Comando> comandos;
+  Expressao exp;
+
+  Repeat(ArrayList<Comando> comandos, Expressao exp) {
+    this.comandos = comandos;
+    this.exp = exp;
+  }
+
+  @Override
+  public String toString() {
+    return "repeat {" + comandos.toString() + "} until (" + exp.toString() + ");";
+  }
+}
+
+// "return" EXP ";" 
+class Return extends Comando {
+  Expressao exp;
+
+  Return(Expressao exp) {
+    this.exp = exp;
+  }
+
+  @Override
+  public String toString() {
+    return "return " + exp.toString() + ";";
+  }
+}
+
+// "System.output" "(" EXP ")" ";"
+class SystemOut extends Comando {
+  Expressao exp;
+
+  SystemOut(Expressao exp) {
+    this.exp = exp;
+  }
+
+  @Override
+  public String toString() {
+    return "System.output(" + exp.toString() + ");";
+  }
+}
+
+// SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
+class SeqComandos {
+  ArrayList<Comando> comandos;
+
+  SeqComandos(ArrayList<Comando> comandos) {
+    this.comandos = comandos;
+  }
+
+  @Override
+  public String toString() {
+    String comandos = "";
+    for (Comando c : this.comandos)
+      comandos += c.toString() + "";
+    return comandos;
+  }
+}
+
+// COMANDO -> TOKEN_id COMANDO'
+class ComandoId extends Comando {
+  String id;
+}
+
+// EXP -> "(" EXP OP EXP ")" 
+class Operacao extends Expressao {
+  Expressao exp1;
+  Operador op;
+  Expressao exp2;
+
+  Operacao(Expressao exp1, Operador op, Expressao exp2) {
+    this.exp1 = exp1;
+    this.op = op;
+    this.exp2 = exp2;
+  }
+
+  @Override
+  public String toString() {
+    return "(" + exp1 + op.toString()+ exp2 + ")";
+  }
+}
+
+// COMANDO -> TOKEN_id COMANDO'
+// COMANDO' -> "(" LISTAEXP? ")" ";" 
+class ChamadaFuncao extends ComandoId { 
+  ArrayList<Expressao> exps;
+
+  ChamadaFuncao(String id, ArrayList<Expressao> exps) {
+    this.id = id;
+    this.exps = exps;
+  }
+
+  @Override
+  public String toString() {
+    return id + exps.toString();
+  }
+}
+
+// COMANDO -> TOKEN_id COMANDO'
+// COMANDO' -> "=" COMANDO''  
+// COMANDO'' -> EXP ";" 
+class AtribExp extends ComandoId {
+  Expressao exp;
+
+  AtribExp(String id, Expressao exp) {
+    this.id = id;
+    this.exp = exp;
+  }
+
+  @Override
+  public String toString() {
+    return "" + id + " = " + exp.toString();
+  }
+}
+
+// COMANDO -> TOKEN_id COMANDO'
+// COMANDO' -> "=" COMANDO2
+// COMANDO'' -> "System.readint" "(" ")" ";" 
+class AtribRead extends ComandoId {
+  AtribRead(String id) {
+    this.id = id;
+  }
+
+  @Override
+  public String toString() {
+    return "" + id + " = " + "System.readint();";
+  }
+}
+
+// EXP -> FATOR
+// FATOR -> TOKEN_id FATOR'
+// FATOR' -> "(" LISTAEXP? ")"
+class FatorListaExp extends Expressao {
+  String id;
+  ArrayList<Expressao> exps; // desse jeito ta errada, obrigada a ter um Exp
+
+  FatorListaExp(String id, ArrayList<Expressao> exps) {
+    this.id = id;
+    this.exps = exps;
+  }
+
+  @Override 
+  public String toString() {
+    return id + " (" + exps.toString() + ")";
+  }
+}
+
+// EXP -> FATOR
+// FATOR -> TOKEN_id FATOR'
+// FATOR' -> vazio
+// ???
+
+// EXP -> FATOR
+// FATOR -> TOKEN_numliteral
+class FatorNum extends Expressao {
+  String num;
+
+  FatorNum(String num) {
+    this.num = num;
+  }
+
+  @Override 
+  public String toString() {
+    return num;
+  }
+}
+
+// EXP -> FATOR
+// FATOR -> "true"
+class FatorTrue extends Expressao {
+  @Override
+  public String toString() {
+    return "true";
+  }
+}
+
+// EXP -> FATOR
+// FATOR -> "false"
+class FatorFalse extends Expressao {
+  @Override
+  public String toString() {
+    return "false";
+  }
+}
+
+
+// LISTAEXP -> EXP LISTAEXP' 
+// LISTAEXP' -> "," EXP LISTAEXP'
+class ListaExp {
+  ArrayList<Expressao> exps;
+
+  ListaExp(ArrayList<Expressao> exps) {
+    this.exps = exps;
+  }
+
+  public void add(Expressao e) {
+    this.exps.add(e);
+  }
+
+  @Override
+  public String toString() {
+    if (exps.size() > 0) {
+      String exps = this.exps.get(0).toString(); // exp listaexp' e listaexp' -> vazio
+      int i;
+      for (i = 1; i < this.exps.size(); ++i) // listaexp' -> exp listaexp'
+        exps += ", " + this.exps.get(i).toString();
+      return exps;
+    }
+    return ""; // listaexp?
+  }
+}
+
+// TIPO TOKEN_id
+class Argumento {
+  Tipo tipo;
+  String id;
+
+  Argumento(Tipo tipo, String id) {
+    this.tipo = tipo;
+    this.id = id;
+  }
+
+  @Override
+  public String toString() {
+    return tipo.toString()+ id;
+  }
+}
+
+// LISTAARG -> TIPO TOKEN_id LISTAARG'
+// LISTAARG' -> "," TIPO TOKEN_id LISTAARG'
+class ListaArg {
+  ArrayList<Argumento> args;
+
+  ListaArg(ArrayList<Argumento> args) {
+    this.args = args;
+  }
+
+  public void add(Argumento a) {
+    this.args.add(a);
+  }
+
+  @Override
+  public String toString() {
+    if (args.size() > 0) {
+      String args = this.args.get(0).toString(); // arg listaarg' e listaarg' -> vazio
+      int i;
+      for (i = 1; i < this.args.size(); ++i) // listaarg' -> arg listaarg'
+        args += ", " + this.args.get(i).toString();
+      return args;
+    }
+    return ""; // listaarg?
+  }
+}
+
+
+
+// FUNC -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
+// FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
+class Funcao {
+  Tipo tipo;
+  String id;
+  ArrayList<Argumento> args;
+  ArrayList<Variavel> variaveis;
+  ArrayList<Comando> seq_comandos;
+  // ArrayList<Variavel> variaveis;
+  // ArrayList<Comando> comandos;
+
+  Funcao(Tipo tipo, String id, ArrayList<Argumento> args, ArrayList<Variavel> vars, ArrayList<Comando> comandos) {
+    this.tipo = tipo;
+    this.id = id;
+    this.args = args;
+    this.variaveis = vars;
+    this.seq_comandos = comandos;
+  }
+
+  @Override
+  public String toString() {
+    return "func " + tipo.toString() + id + "(" + args.toString() + ") {\n" + variaveis.toString() + seq_comandos.toString() + "\n}\n";
+  }
+}
+
+// FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC' | vazio
+class Funcoes {
+  ArrayList<Funcao> funcoes;
+
+  Funcoes(ArrayList<Funcao> funcoes) {
+    this.funcoes = funcoes;
+  }
+
+  public void add(Funcao f) {
+    this.funcoes.add(f);
+  }
+
+  @Override
+  public String toString() {
+    String funcoes = "";
+    for (Funcao f : this.funcoes)
+      funcoes += f.toString();
+    return funcoes;
+  }
+}
+  
+// MAIN -> "void" "main" "(" ")" "{" VARDECL SEQCOMANDOS "}"
+class Main {
+  ArrayList<Variavel> variaveis;
+  ArrayList<Comando> seq_comandos;
+
+  Main(ArrayList<Variavel> vars, ArrayList<Comando> comandos) {
+    this.variaveis = vars;
+    this.seq_comandos = comandos;
+  }
+
+  @Override
+  public String toString() {
+    return "void main () {" + variaveis.toString() + seq_comandos.toString() + "}";
+  }
+}
+
+// KARLOFF -> MAIN FUNC?
+class ArvoreKarloff {
+  Main principal;
+  ArrayList<Funcao> funcoes;
+
+  ArvoreKarloff(Main principal, ArrayList<Funcao> funcoes) {
+    this.principal = principal;
+    this.funcoes = funcoes;
+  }
+
+  @Override
+  public String toString() {
+    return principal.toString() + funcoes.toString();
+  }
+}
+
+public class Karloff {
   public static void main(String args[]) throws Exception {  
     FileInputStream file = new FileInputStream(new File(args[0]));
     Karloff analisador = new Karloff(file);
     ArvoreKarloff arvore = analisador.Karloff();
     gerarCodigo(arvore, args[0]);
   }
-
-    // deve gerar um arquivo .java (ou outra linguagem) 
-    // com o mesmo nome do arquivo de entrada
-  public static void gerarCodigo(ArvoreKarloff arvore, String arquivo) {
-    // ???
-  }
-
-  // KARLOFF -> MAIN FUNC?
-  class ArvoreKarloff {
-    Main principal;
-    ArrayList<Func> funcoes;
-
-    ArvoreKarloff(Main principal, ArrayList<Func> funcoes) {
-      this.principal = principal;
-      this.funcoes = funcoes;
-    }
-
-    @Override
-    public String toString() {
-      String funcoes = "";
-      for (Func f : this.funcoes)
-        funcoes += f.toString();
-      return principal.toString() + funcoes;
-    }
-  }
-    
-  // MAIN -> "void" "main" "(" ")" "{" VARDECL SEQCOMANDOS "}"
-  class Main {
-    VarDecl variaveis;
-    SeqComandos comandos;
-
-    Main(VarDecl variaveis, SeqComandos comandos) {
-      this.variaveis = variaveis;
-      this.comandos = comandos;
-    }
-
-    @Override
-    public String toString() {
-      return "void main () {" + variaveis.toString() + comandos.toString() + "}";
-    }
-  }
-
-  class Variavel {
-    Tipo tipo;
-    String nome;
-
-    Variavel(Tipo tipo, String nome) {
-      this.tipo = tipo;
-      this.nome = nome;
-    }
-
-    @Override
-    public String toString() {
-      return "newVar" + tipo.toString() + id + ";";
-    }
-  }
-
-  // VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
-  class VarDecl {
-    ArrayList<Variavel> variaveis;
-
-    VarDecl(ArrayList<Variavel> variaveis) {
-      this.variaveis = variaveis;
-    }
-
-    @Override
-    public String toString() {
-      String variaveis = variaveis.get(0).toString(); 
-      int i;
-      for (i = 1; i < variaveis.size(); ++i) 
-        variaveis += variaveis.get(i).toString();
-      return variaveis;
-    }
-  }
-
-  // TIPO -> "integer" | "bool"
-  class Tipo {
-    String tipo;
-
-    Tipo(String tipo) {
-      this.tipo = tipo;
-    }
-
-    @Override
-    public String toString() {
-      return tipo;
-    }
-  }
-
-  // SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
-  class SeqComandos {
-    ArrayList<Comando> comandos;
-
-    SeqComandos(ArrayList<Comando> comandos) {
-      this.comandos = comandos;
-    }
-
-    @Override
-    public String toString() {
-      String comandos = "";
-      for (Comando c : this.comandos)
-        comandos += c.toString() + "";
-      return comandos;
-    }
-  }
   
-  class Comando {  }
-
-  // "if" "(" EXP ")" "then" "{" SEQCOMANDOS "}" ";"
-  class If extends Comando {
-    Expressao exp;
-    SeqComandos comandos;
-
-    If(Expressao exp, SeqComandos comandos) {
-      this.exp = exp;
-      this.comandos = comandos;
-    }
-
-    @Override
-    public String toString() {
-      return "if (" + exp.toString + ") then {" + comandos.toString() + "};";
-    }
+  // deve gerar um arquivo .java (ou outra linguagem) 
+  // com o mesmo nome do arquivo de entrada
+  public static void gerarCodigo(ArvoreKarloff arvore, String arquivo) throws Exception {
+    System.out.println(arvore.toString());
   }
-  
-  // "while" "(" EXP ")" "{" SEQCOMANDOS "}" ";"
-  class While extends Comando {
-    Expressao exp;
-    SeqComandos comandos;
-
-    While(Expressao exp, SeqComandos comandos) {
-      this.exp = exp;
-      this.comandos = comandos;
-    }
-
-    @Override
-    public String toString() {
-      return "while (" + exp.toString() + ") {" + comandos.toString() + "};";
-    }
-  }
-  
-  // "repeat" "{" SEQCOMANDOS "}" "until" "(" EXP ")" ";"
-  class Repeat extends Comando {
-    SeqComandos comandos;
-    Expressao exp;
-
-    Repeat(SeqComandos comandos, Expressao exp) {
-      this.comandos = comandos;
-      this.exp = exp;
-    }
-
-    @Override
-    public String toString() {
-      return "repeat {" + comandos.toString() + "} until (" + exp.toString() + ");";
-    }
-  }
-  
-  // "return" EXP ";" 
-  class Return extends Comando {
-    Expressao exp;
-
-    Return(Expressao exp) {
-      this.exp = exp;
-    }
-
-    @Override
-    public String toString() {
-      return "return " + exp.toString() + ";";
-    }
-  }
-  
-  // "System.output" "(" EXP ")" ";"
-  class SystemOut extends Comando {
-    Expressao exp;
-
-    SystemOut(Expressao exp) {
-      this.exp = exp;
-    }
-
-    @Override
-    public String toString() {
-      return "System.output(" + exp.toString() + ");";
-    }
-  }
-
-  // COMANDO -> TOKEN_id COMANDO'
-  class ComandoId extends Comando {
-    String id;
-  }
-  
-  // COMANDO -> TOKEN_id COMANDO'
-  // COMANDO' -> "(" LISTAEXP? ")" ";" 
-  class IdListaExp extends ComandoId { 
-    ListaExpressao exps;
-
-    IdListaExp(String id, ListaExpressao exps) {
-      this.id = id;
-      this.exps = exps;
-    }
-
-    @Override
-    public String toString() {
-      return id + exps.toString();
-    }
-  }
-
-  // COMANDO -> TOKEN_id COMANDO'
-  // COMANDO' -> "=" COMANDO''  
-  // COMANDO'' -> EXP ";" 
-  class AtribExp extends ComandoId {
-    Expressao exp;
-
-    AtribExp(String id, Expressao exp) {
-      this.id = id;
-      this.exp = exp;
-    }
-
-    @Override
-    public String toString() {
-      return "" + id + " = " + exp.toString();
-    }
-  }
-
-  // COMANDO -> TOKEN_id COMANDO'
-  // COMANDO' -> "=" COMANDO2
-  // COMANDO'' -> "System.readint" "(" ")" ";" 
-  class AtribRead extends ComandoId {
-    AtribRead(String id) {
-      this.id = id;
-    }
-
-    @Override
-    public String toString() {
-      return "" + id + " = " + "System.readint();";
-    }
-  }
-  
-  class Expressao {  }
-
-  // EXP -> "(" EXP OP EXP ")" 
-  class Operacao extends Expressao {
-    Expressao exp1;
-    Operador op;
-    Expressao exp2;
-
-    Operacao(Expressao exp1, Operador op, Expressao exp2) {
-      this.exp1 = exp1;
-      this.op = op;
-      this.exp2 = exp2;
-    }
-
-    @Override
-    public String toString() {
-      return "(" + exp1 + op.toString + exp2 + ")";
-    }
-  }
-  
-  // EXP -> FATOR
-  // FATOR -> TOKEN_id FATOR'
-  // FATOR' -> "(" LISTAEXP? ")"
-  class FatorListaExp extends Expressao {
-    String id;
-    ListaExpressao exps; // desse jeito ta errada, obrigada a ter um Exp
-
-    FatorListaExp(String id, ListaExpressao exps) {
-      this.id = id;
-      this.exps = exps;
-    }
-
-    @Override 
-    public String toString() {
-      return id + " (" + exps.toString() + ")";
-    }
-  }
-  
-  // EXP -> FATOR
-  // FATOR -> TOKEN_id FATOR'
-  // FATOR' -> vazio
-  // ???
-
-  // EXP -> FATOR
-  // FATOR -> TOKEN_numliteral
-  class FatorNum extends Expressao {
-    Double num;
-
-    FatorNum(Double num) {
-      this.num = num;
-    }
-
-    @Override 
-    public String toString() {
-      return Integer.valueOf(num);
-    }
-  }
-
-  // EXP -> FATOR
-  // FATOR -> "true"
-  class True extends Expressao {
-    @Override
-    public String toString() {
-      return "true";
-    }
-  }
-
-  // EXP -> FATOR
-  // FATOR -> "false"
-  class False extends Expressao {
-    @Override
-    public String toString() {
-      return "false";
-    }
-  }
-
-  // OP -> "+" | "-" | "*" | "/" | "&" | "|" | "<" | ">" | "=="
-  class Operador {
-    String operador;
-
-    Operador(String operador) {
-      this.operador = operador;
-    }
-
-    @Override
-    public String toString() {
-      return operador;
-    }
-  }
-  
-  // LISTAEXP -> EXP LISTAEXP' 
-  // LISTAEXP' -> "," EXP LISTAEXP'
-  class ListaExp {
-    ArrayList<Expressao> exps;
-
-    ListaExp(ArrayList<Expressao> exps) {
-      this.exps = exps;
-    }
-
-    @Override
-    public String toString() {
-      if (exps.size() > 0) {
-        String exps = exps.get(0).toString(); // exp listaexp' e listaexp' -> vazio
-        int i;
-        for (i = 1; i < exps.size(); ++i) // listaexp' -> exp listaexp'
-          exps += ", " + exps.get(i).toString();
-        return exps;
-      }
-      return ""; // listaexp?
-    }
-  }
-  
-  // FUNC -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
-  // FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
-  class Funcao {
-    Tipo tipo;
-    String id;
-    ListaArg lista_arg;
-    VarDecl variaveis;
-    SeqComandos comandos;
-
-    Funcao(Tipo tipo, String id, ListaArg lista_arg, VarDecl variaveis, SeqComandos comandos) {
-      this.tipo = tipo;
-      this.id = id;
-      this.lista_arg = lista_arg;
-      this.variaveis = variaveis;
-      this.comandos = comandos;
-    }
-
-    @Override
-    public String toString() {
-      return "func " + tipo.toString() + id + "(" + lista_arg.toString() + ") {\n" + variaveis.toString() + comandos.toString() + "\n}\n";
-    }
-  }
-  
-  // FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC' | vazio
-  class Funcoes {
-    ArrayList<Funcao> funcoes;
-
-    Funcoes(ArrayList<Funcao> funcoes) {
-      this.funcoes = funcoes;
-    }
-
-    @Override
-    public String toString() {
-      String funcoes = "";
-      for (Funcao f : this.funcoes)
-        funcoes += f.toString() + "";
-      return funcoes;
-    }
-  }
-
-  // TIPO TOKEN_id
-  class Argumento {
-    Tipo tipo;
-    String id;
-
-    Argumento(Tipo tipo, String id) {
-      this.tipo = tipo;
-      this.id = id;
-    }
-
-    @Override
-    public String toString() {
-      return tipo.toString + id;
-    }
-  }
-  
-  // LISTAARG -> TIPO TOKEN_id LISTAARG'
-  // LISTAARG' -> "," TIPO TOKEN_id LISTAARG'
-  class ListaArg {
-    ArrayList<Argumento> args;
-
-    ListaArg(ArrayList<Argumento> args) {
-      this.args = args;
-    }
-
-    @Override
-    public String toString() {
-      if (args.size() > 0) {
-        String args = args.get(0).toString(); // arg listaarg' e listaarg' -> vazio
-        int i;
-        for (i = 1; i < args.size(); ++i) // listaarg' -> arg listaarg'
-          args += ", " + args.get(i).toString();
-        return args;
-      }
-      return ""; // listaarg?
-    }
-  }
-
 }
 
 PARSER_END(Karloff)
@@ -503,14 +516,15 @@ ArvoreKarloff Karloff () : {
   (
     principal = Main() 
     (Func(funcoes))?
+    <EOF>
   )
   { return new ArvoreKarloff(principal, funcoes); }
 }
 
 // MAIN -> "void" "main" "(" ")" "{" VARDECL SEQCOMANDOS "}"
-main Main () : {
-  ArrayList<Variavel> variaveis = null;
-  ArrayList<Comando> comandos = null;
+Main Main () : {
+  ArrayList<Variavel> variaveis = new ArrayList();
+  ArrayList<Comando> comandos = new ArrayList();
 } {
   <VOID> 
   <MAIN> 
@@ -524,22 +538,18 @@ main Main () : {
   { return new Main(variaveis, comandos); }
 }
 
-// VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
-ArrayList<Variavel> VarDecl (ArrayList<Variavel> variaveis) : {
-  Tipo tipo;
-  Token id;
-  Variavel var;
+// // VARDECL -> "newVar" TIPO TOKEN_id ";" VARDECL | vazio
+void VarDecl (ArrayList<Variavel> variaveis) : {
+  Tipo tipo = null;
+  Token id = null;
 } {
   (
     <NEWVAR>
     tipo = Tipo()
     id = <ID>
     <PONTOVIRG>
-    { 
-      variaveis.add(new Variavel(tipo, id.image())); 
-      return variaveis;
-    }
-    // VarDecl(variaveis)
+    { variaveis.add(new Variavel(tipo, id.image)); }
+    VarDecl(variaveis)
   )?
 }
 
@@ -554,15 +564,20 @@ Tipo Tipo () : {} {
     <BOOL>
     { return new Tipo("bool"); }
   )
+
+  // { return result; }
 }
 
-// SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
+// // SEQCOMANDOS -> COMANDO SEQCOMANDOS | vazio
 void SeqComandos (ArrayList<Comando> comandos) : {
   Comando c = null;
 } {
   (
     c = Comando()
-    { comandos.add(c); }
+    { 
+      comandos.add(c); 
+      System.out.println(c);
+    }
     SeqComandos(comandos)
   )?
 }
@@ -573,33 +588,38 @@ void SeqComandos (ArrayList<Comando> comandos) : {
 //    | "repeat" "{" SEQCOMANDOS "}" "until" "(" EXP ")" ";"
 //    | "return" EXP ";" 
 //    | "System.output" "(" EXP ")" ";"
-void Comando (ArrayList<Comando> comandos, ArrayList<Exp> lista_exp) : {
+Comando Comando () : {
   Token id = null;
   Comando c = null;
   Expressao exp = null;
+  // ArrayList<Expressao> exps = new ArrayList<Expressao>();
+  ArrayList<Comando> comandos = new ArrayList();
 } {
   (
     id = <ID> 
-    c = ComandoLinha1(id, lista_exp)
+    c = ComandoLinha1(id.image)
+    { return c; }
   ) | (
     <IF> 
     <APARENT> 
-    exp = Expressao() 
+    exp = Exp() 
     <FPARENT> 
     <THEN> 
     <ACHAVES> 
     SeqComandos(comandos) 
     <FCHAVES> 
     <PONTOVIRG>
+    { return new If(exp, comandos); }
   ) | (
     <WHILE> 
     <APARENT> 
-    exp = Expressao() 
+    exp = Exp() 
     <FPARENT> 
     <ACHAVES> 
     SeqComandos(comandos) 
     <FCHAVES> 
     <PONTOVIRG>
+    { return new While(exp, comandos); }
   ) | (
     <REPEAT>
     <ACHAVES>
@@ -607,42 +627,57 @@ void Comando (ArrayList<Comando> comandos, ArrayList<Exp> lista_exp) : {
     <FCHAVES> 
     <UNTIL> 
     <APARENT> 
-    exp = Expressao() 
+    exp = Exp() 
     <FPARENT> 
     <PONTOVIRG>
+    { return new Repeat(comandos, exp); }
   ) | (
     <RETURN> 
-    exp = Expressao() 
+    exp = Exp() 
     <PONTOVIRG>
+    { return new Return(exp); }
   ) | (
     <SYSOUT> 
     <APARENT> 
-    exp = Expressao() 
+    exp = Exp() 
     <FPARENT> 
     <PONTOVIRG>
+    { return new SystemOut(exp); }
   )
+
+  // { return result; }
 }
 
 // COMANDO' -> "(" LISTAEXP? ")" ";" | "=" COMANDO''
-Comando ComandoLinha1(String id, ArrayList<Exp> lista_exp) : {} {
+Comando ComandoLinha1(String id) : {
+  Comando c = null;
+  ArrayList<Expressao> exps = new ArrayList();
+} {
   (
     <APARENT> 
-    (ListaExp(lista_exp))? 
+    (ListaExp(exps))? 
     <FPARENT> 
     <PONTOVIRG>
-    { return new IdListaExp(id, lista_exp); }
+    { 
+      c = new ChamadaFuncao(id, exps); 
+      return c;
+    }
   ) | (
     <ATRIB> 
-    ComandoLinha2(id)
+    c = ComandoLinha2(id)
+    { return c; }
   )
+
+  // { return result; }
 }
 
 // COMANDO'' -> EXP ";" | "System.readint" "(" ")" ";"
 Comando ComandoLinha2(String id) : {
-  Expressao exp;
+  Expressao exp = null;
+  // Comando result = null;
 } {
    (
-    exp = Expressao() 
+    exp = Exp() 
     <PONTOVIRG>
     { return new AtribExp(id, exp); }
   ) | (
@@ -652,51 +687,15 @@ Comando ComandoLinha2(String id) : {
     <PONTOVIRG>
     { return new AtribRead(id); }
   )
-}
 
-// EXP -> "(" EXP OP EXP ")" | FATOR
-Expressao Exp () : {
-  Expressao exp1, exp2;
-  Op op;
-} {
-  (
-    <APARENT> 
-    exp1 = Expressao() 
-    op = Op() 
-    exp2 = Expressao() 
-    { return new Expressao(exp1, op, exp2); }
-    <FPARENT>
-  ) | (
-    Fator()
-  )
-}
-
-// FATOR -> TOKEN_id FATOR' | TOKEN_numliteral | "true" | "false
-void Fator () : {
-  Token id;
-} {
-  (
-    id = <ID> 
-    FatorLinha()
-  ) |
-  <NUM> | 
-  <TRUE> | 
-  <FALSE>
-}
-
-// FATOR' -> "(" LISTAEXP? ")" | vazio
-void FatorLinha () : {} {
-  (
-    <APARENT> 
-    (ListaExpressao())? 
-    <FPARENT>
-  )?
+  // { return result; }
 }
 
 // OP -> "+" | "-" | "*" | "/" | "&" | "|" | "<" | ">" | "=="
 Operador Op () : {
- Token op;
-} {
+  Token op;
+  Operador result = null;
+ } {
   (
     op = <SOMA> | 
     op = <SUBTR> | 
@@ -708,82 +707,160 @@ Operador Op () : {
     op = <MAIORQUE> | 
     op = <IGUAL>
   )
-  { return new Operador(op.image); }
+  { 
+    result = new Operador(op.image); 
+    return result;
+  }
 }
 
+// EXP -> "(" EXP OP EXP ")" | FATOR
+Expressao Exp () : {
+  Expressao exp1, exp2, result = null;
+  Operador op;
+} {
+  (
+    <APARENT> 
+    exp1 = Exp() 
+    op = Op() 
+    exp2 = Exp() 
+    { result = new Operacao(exp1, op, exp2); }
+    <FPARENT>
+  ) | (
+    Fator()
+  )
+
+  { return result; }
+}
+
+// FATOR -> TOKEN_id FATOR' | TOKEN_numliteral | "true" | "false
+void Fator () : {
+  Token t;
+  ArrayList<Expressao> exps = new ArrayList();
+} {
+  (
+    t = <ID> 
+    FatorLinha(t.image, exps)
+  ) | (
+    t = <NUM> 
+    { exps.add(new FatorNum(t.image)); }
+  ) | (
+    t = <TRUE> 
+    { exps.add(new FatorTrue()); }
+  ) | (
+    t = <FALSE>
+    { exps.add(new FatorFalse()); }
+  )
+}
+
+// FATOR' -> "(" LISTAEXP? ")" | vazio
+void FatorLinha (String id, ArrayList<Expressao> exps) : {} {
+  (
+    <APARENT> 
+    (ListaExp(exps))? 
+    <FPARENT>
+    { exps.add(new FatorListaExp(id, exps)); }
+  )?
+}
+
+
+
 // LISTAEXP -> EXP LISTAEXP' 
-void ListaExp (ArrayList<Exp> listaExp) : {
+void ListaExp (ArrayList<Expressao> listaExp) : {
   Expressao exp;
 } {
-  exp = Expressao() 
+  exp = Exp() 
   { listaExp.add(exp); }
   ListaExpLinha(listaExp)
 }
 
 // LISTAEXP' -> "," EXP LISTAEXP' | vazio
-void ListaExpLinha (ArrayList<Exp> listaExp) : {
+void ListaExpLinha (ArrayList<Expressao> exps) : {
   Expressao exp;
 } {
   (
     <VIRGULA> 
-    exp = Expressao() 
-    { listaExp.add(exp); }
-    ListaExpLinha(listaExp)
+    exp = Exp() 
+    { exps.add(exp); }
+    ListaExpLinha(exps)
   )?
 }
 
-// FUNC -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
-void Func () : {} {
+// // FUNC -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC'
+void Func (ArrayList<Funcao> funcoes) : {
+  Tipo tipo;
+  Token id;
+  ArrayList<Variavel> variaveis = new ArrayList();
+  ArrayList<Comando> comandos = new ArrayList();
+  ArrayList<Argumento> args = new ArrayList();
+  Funcao funcao = null;
+} {
   <FUNC> 
-  Tipo() 
-  <ID> 
+  tipo = Tipo() 
+  id = <ID> 
   <APARENT> 
-  (ListaArg())? 
+  (ListaArg(args))? 
   <FPARENT> 
   <ACHAVES> 
-  VarDecl() 
-  SeqComandos() 
+  VarDecl(variaveis) 
+  SeqComandos(comandos) 
+  { 
+    funcao = new Funcao(tipo, id.image, args, variaveis, comandos);
+    funcoes.add(funcao);
+  }
   <FCHAVES> 
-  FuncLinha()
+  FuncLinha(funcoes)
 }
 
 // FUNC' -> "func" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" FUNC' | vazio
-void FuncLinha () : {
-  Token id;
+void FuncLinha (ArrayList<Funcao> funcoes) : {
   Tipo tipo;
+  Token id;
+  ArrayList<Variavel> variaveis = new ArrayList();
+  ArrayList<Comando> comandos = new ArrayList();
+  ArrayList<Argumento> args = new ArrayList();
+  Funcao funcao = null;
 } {
   (
     <FUNC> 
     tipo = Tipo() 
     id = <ID> 
     <APARENT> 
-    (ListaArg())? 
+    (ListaArg(args))? 
     <FPARENT> 
     <ACHAVES> 
-    VarDecl() 
-    SeqComandos() 
+    VarDecl(variaveis) 
+    SeqComandos(comandos)
+    { 
+      funcao = new Funcao(tipo, id.image, args, variaveis, comandos);
+      funcoes.add(funcao);
+    } 
     <FCHAVES> 
-    FuncLinha()
+    FuncLinha(funcoes)
   )?
 }
 
 // LISTAARG -> TIPO TOKEN_id LISTAARG'
-void ListaArg () : {
-  ArrayList<Argumento> args;
+void ListaArg (ArrayList<Argumento> args) : {
+  Argumento arg;
+  Tipo tipo;
+  Token id;
 } {
-  Tipo() 
-  <ID> 
-  ListaArgLinha()
+  tipo = Tipo() 
+  id = <ID> 
+  { args.add(new Argumento(tipo, id.image)); }
+  ListaArgLinha(args)
 }
 
 // LISTAARG' -> "," TIPO TOKEN_id LISTAARG' | vazio
 void ListaArgLinha (ArrayList<Argumento> args) : {
+  Tipo tipo;
   Token id;
 } {
   (
     <VIRGULA> 
-    Tipo() 
+    tipo = Tipo() 
     id = <ID> 
-    ListaArgLinha()
+    { args.add(new Argumento(tipo, id.image)); }
+    ListaArgLinha(args)
   )?
 }
