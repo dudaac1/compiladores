@@ -36,22 +36,6 @@ class Variavel {
   }
 }
 
-class VarDecl {
-  ArrayList<Variavel> variaveis;
-
-  VarDecl(ArrayList<Variavel> variaveis) {
-    this.variaveis = variaveis;
-  }
-
-  @Override
-  public String toString() {
-    String vars = ""; 
-    for (Variavel v : variaveis)
-      vars = vars.concat(v.toString());
-    return vars;
-  }
-}
-
 class Operador {
   String operador;
 
@@ -148,7 +132,7 @@ class SystemOut extends Comando {
   @Override
   public String toString() {
     // return "System.output(" + exp.toString() + ");\n";
-    return "printf(" + exp.toString() + ");\n";
+    return "printf(\"%d\", " + exp.toString() + ");\n";
   }
 }
 
@@ -290,7 +274,6 @@ class FatorVar extends Fator {
   }
 }
 
-
 class ExpressaoFator extends Expressao {
   Fator fator;
 
@@ -371,7 +354,11 @@ class Main {
     for (Comando c : seq_comandos) 
       comandos = comandos.concat(c.toString());
     
-    return "#include <stdio.h>\n#include <stdlib.h>\nint main () {\n" + vars + comandos + "return 0;\n}";
+    return "int main () {\n" + vars + comandos + "return 0;\n}";
+  }
+
+  public String getBiblio() {
+    return "#include <stdio.h>\n#include <stdlib.h>\n";
   }
 }
 
@@ -386,10 +373,11 @@ class ArvoreKarloff {
 
   @Override
   public String toString() {
+    String biblio = principal.getBiblio();
     String funcs = "";
     for (Funcao f : funcoes) 
       funcs = funcs.concat(f.toString() + "\n");
-    return principal.toString() + funcs;
+    return biblio + funcs + "\n" +principal.toString();
   }
 }
 
@@ -405,6 +393,7 @@ public class Karloff {
   // com o mesmo nome do arquivo de entrada
   public static void gerarCodigo(ArvoreKarloff arvore, String caminho) throws Exception {
     String arvore_string = arvore.toString();
+    caminho = caminho.replace(".kar", ".c");
     System.out.println(arvore_string);
     File arquivo = new File("saida/" + caminho);
     arquivo.createNewFile();
@@ -731,7 +720,6 @@ Fator Fator () : {
 //     { exps.add(new FatorListaExp(id, exps)); }
 //   )?
 // }
-
 
 
 // LISTAEXP -> EXP LISTAEXP' 
